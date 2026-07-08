@@ -1,0 +1,13 @@
+# ---------------------------------------------------------------------------
+# Feature flags. Each capability from the roadmap ships behind a flag so the
+# platform always boots in a working state, and later milestones can be toggled
+# on independently. Flags default to the milestone that delivers them.
+# ---------------------------------------------------------------------------
+flags:
+  temporal_features: false      # M3
+  knowledge_graph: false        # M3
+  pattern_discovery: false      # M4
+  confidence_intelligence: false # M4
+  compliance_engine: false      # M5
+  offer_orchestration: false    # M5
+  continuous_learning: false    # M6 — simulated outcomes, always labelled as such

@@ -1,0 +1,25 @@
+# ---------------------------------------------------------------------------
+# Application configuration (non-secret). Environment variables prefixed with
+# IDBI_ override any value here. Nothing that drives lending policy is
+# hardcoded in Python — it lives in this file and its siblings.
+# ---------------------------------------------------------------------------
+app:
+  name: "IDBI Adaptive Lending Intelligence"
+  environment: "development"
+  api_prefix: "/api/v1"
+
+cors:
+  # Vite dev server origins.
+  allow_origins:
+    - "http://localhost:5173"
+    - "http://127.0.0.1:5173"
+
+logging:
+  level: "INFO"
+  # "json" for production-style structured logs, "console" for readable dev output.
+  renderer: "console"
+
+# Deterministic seed for the synthetic data generator (M1). Fixing it keeps
+# every metric on screen (AUC, lift, SHAP) reproducible across runs.
+data:
+  seed: 20260708

@@ -1,0 +1,74 @@
+/* ==========================================================================
+   Design tokens — the single source of visual truth.
+
+   Palette targets the "intelligence console" feel (Palantir Foundry / Stripe /
+   Vercel): near-black canvas, restrained surfaces, one confident accent, and
+   semantic colours reserved for signal (confidence, risk). No decorative
+   gradients. Everything downstream references these variables — no raw hex in
+   components.
+   ========================================================================== */
+:root {
+  /* ---- Canvas & surfaces (dark, layered) ---- */
+  --color-canvas: #0a0b0d;
+  --color-surface: #101216;
+  --color-surface-raised: #161a20;
+  --color-surface-overlay: #1c212a;
+  --color-border: #232833;
+  --color-border-strong: #333a47;
+
+  /* ---- Text ---- */
+  --color-text: #e6e9ef;
+  --color-text-secondary: #9aa3b2;
+  --color-text-muted: #626b7a;
+
+  /* ---- Accent (single, confident) ---- */
+  --color-accent: #4c8dff;
+  --color-accent-hover: #669eff;
+  --color-accent-subtle: rgba(76, 141, 255, 0.12);
+
+  /* ---- Semantic signal ---- */
+  --color-positive: #2fbf71;
+  --color-warning: #e0a53b;
+  --color-negative: #e5484d;
+  --color-info: #4c8dff;
+  --color-positive-subtle: rgba(47, 191, 113, 0.12);
+  --color-warning-subtle: rgba(224, 165, 59, 0.12);
+  --color-negative-subtle: rgba(229, 72, 77, 0.12);
+
+  /* ---- Typography ---- */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", "Cascadia Code", Consolas, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+  --text-2xl: 2.5rem;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* ---- Spacing (4px base) ---- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-8: 3rem;
+
+  /* ---- Radius & elevation ---- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5);
+
+  /* ---- Motion ---- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+}

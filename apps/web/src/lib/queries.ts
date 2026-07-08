@@ -1,9 +1,10 @@
 /** TanStack Query hooks — the only place components touch the API. */
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   apiGet,
+  apiPost,
   type ApplicantSummary,
   type CapabilitiesResponse,
   type ComplianceSummary,
@@ -12,12 +13,14 @@ import {
   type Decision,
   type GraphResponse,
   type HealthResponse,
+  type LearningState,
   type ModelCard,
   type ModelCard2,
   type Offer,
   type Pattern,
   type PatternMatch,
   type TimelineResponse,
+  type ValidationReport,
 } from "./api";
 
 export function useHealth() {
@@ -124,4 +127,31 @@ export function useComplianceSummary() {
     queryKey: ["compliance-summary"],
     queryFn: () => apiGet<ComplianceSummary>("/compliance/summary"),
   });
+}
+
+export function useValidation() {
+  return useQuery({
+    queryKey: ["validation"],
+    queryFn: () => apiGet<ValidationReport>("/validation/report"),
+  });
+}
+
+export function useLearningState() {
+  return useQuery({
+    queryKey: ["learning"],
+    queryFn: () => apiGet<LearningState>("/learning/state"),
+  });
+}
+
+export function useLearningMutations() {
+  const qc = useQueryClient();
+  const retrain = useMutation({
+    mutationFn: () => apiPost<LearningState>("/learning/retrain"),
+    onSuccess: (data) => qc.setQueryData(["learning"], data),
+  });
+  const reset = useMutation({
+    mutationFn: () => apiPost<LearningState>("/learning/reset"),
+    onSuccess: (data) => qc.setQueryData(["learning"], data),
+  });
+  return { retrain, reset };
 }

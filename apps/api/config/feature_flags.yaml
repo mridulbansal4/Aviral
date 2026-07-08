@@ -10,4 +10,4 @@ flags:
   confidence_intelligence: true # M4
   compliance_engine: true       # M5
   offer_orchestration: true     # M5
-  continuous_learning: false    # M6 — simulated outcomes, always labelled as such
+  continuous_learning: true     # M6 — simulated outcomes, always labelled as such

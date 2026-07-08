@@ -26,6 +26,17 @@ export async function apiGet<T>(path: string): Promise<T> {
   return (await res.json()) as T;
 }
 
+export async function apiPost<T>(path: string): Promise<T> {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    headers: { Accept: "application/json" },
+  });
+  if (!res.ok) {
+    throw new ApiError(res.status, `POST ${path} failed: ${res.status}`);
+  }
+  return (await res.json()) as T;
+}
+
 /* ---- Response types (kept in sync with the backend DTOs; generated from
    OpenAPI in a later milestone via packages/shared-types). ---- */
 
@@ -249,4 +260,63 @@ export interface ComplianceSummary {
   consent_revoked: number;
   prohibited_feature_count: number;
   used_feature_count: number;
+}
+
+export interface RulePrecision {
+  id: string;
+  label: string;
+  polarity: string;
+  coverage: number;
+  precision: number;
+  lift: number;
+}
+
+export interface FamilyContribution {
+  family: string;
+  feature_count: number;
+  importance_share: number;
+}
+
+export interface DriftFeature {
+  feature: string;
+  psi: number;
+  status: "stable" | "minor" | "material";
+}
+
+export interface ValidationReport {
+  model_version: string;
+  model_metrics: {
+    roc_auc: number;
+    ks_statistic: number;
+    lift_top_decile: number;
+    base_rate: number;
+    n_samples: number;
+  };
+  rules: RulePrecision[];
+  family_contribution: FamilyContribution[];
+  drift: {
+    status: string;
+    reference_label: string;
+    current_label: string;
+    features: DriftFeature[];
+  };
+}
+
+export interface LearningStep {
+  step: number;
+  label: string;
+  train_size: number;
+  roc_auc: number;
+  ks_statistic: number;
+  lift_top_decile: number;
+}
+
+export interface LearningState {
+  simulated: boolean;
+  held_out_size: number;
+  total_pool: number;
+  steps_total: number;
+  current_step: number;
+  can_retrain: boolean;
+  history: LearningStep[];
 }

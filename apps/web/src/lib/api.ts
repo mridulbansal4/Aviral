@@ -148,3 +148,45 @@ export interface GraphResponse {
   edges: GraphEdge[];
   features: InsightMetric[];
 }
+
+export interface ConfidenceDimension {
+  key: string;
+  label: string;
+  value: number;
+  weight: number;
+  rationale: string;
+  inputs: Record<string, number>;
+}
+
+export interface ConfidenceReport {
+  customer_id: string;
+  dimensions: ConfidenceDimension[];
+  decision_confidence: number;
+  band: { label: string; tone: string };
+}
+
+export interface DefiningFeature {
+  feature: string;
+  z: number;
+  phrase: string;
+}
+
+export interface Pattern {
+  id: number;
+  label: string;
+  support: number;
+  precision: number;
+  lift: number;
+  dominant_loan_type: string;
+  significant: boolean;
+  defining_features: DefiningFeature[];
+  example_customer_ids: string[];
+}
+
+export interface PatternMatch {
+  pattern_id: number;
+  label: string;
+  membership: number;
+  precision: number;
+  lift: number;
+}

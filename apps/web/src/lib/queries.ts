@@ -6,10 +6,13 @@ import {
   apiGet,
   type ApplicantSummary,
   type CapabilitiesResponse,
+  type ConfidenceReport,
   type Decision,
   type GraphResponse,
   type HealthResponse,
   type ModelCard,
+  type Pattern,
+  type PatternMatch,
   type TimelineResponse,
 } from "./api";
 
@@ -62,6 +65,29 @@ export function useGraph(customerId: string | null) {
   return useQuery({
     queryKey: ["graph", customerId],
     queryFn: () => apiGet<GraphResponse>(`/applicants/${customerId}/graph`),
+    enabled: !!customerId,
+  });
+}
+
+export function useConfidence(customerId: string | null) {
+  return useQuery({
+    queryKey: ["confidence", customerId],
+    queryFn: () => apiGet<ConfidenceReport>(`/applicants/${customerId}/confidence`),
+    enabled: !!customerId,
+  });
+}
+
+export function usePatterns() {
+  return useQuery({
+    queryKey: ["patterns"],
+    queryFn: () => apiGet<Pattern[]>("/patterns"),
+  });
+}
+
+export function usePatternMatch(customerId: string | null) {
+  return useQuery({
+    queryKey: ["pattern-match", customerId],
+    queryFn: () => apiGet<PatternMatch>(`/applicants/${customerId}/pattern`),
     enabled: !!customerId,
   });
 }

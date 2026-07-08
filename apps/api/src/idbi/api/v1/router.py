@@ -8,12 +8,19 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from idbi.api.v1 import applicants, decisions, health, insights
+from idbi.api.v1 import (
+    applicants,
+    decisions,
+    health,
+    insights,
+    intelligence,
+)
 
 api_router = APIRouter()
 api_router.include_router(health.router)
 api_router.include_router(applicants.router)
 api_router.include_router(decisions.router)
 api_router.include_router(insights.router)
+api_router.include_router(intelligence.router)
 
 __all__ = ["api_router"]

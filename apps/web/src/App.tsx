@@ -7,6 +7,8 @@ import { OverviewPage } from "./features/overview/OverviewPage";
 import { ApplicantsPage } from "./features/applicants/ApplicantsPage";
 import { TimelinePage } from "./features/timeline/TimelinePage";
 import { GraphPage } from "./features/graph/GraphPage";
+import { PatternsPage } from "./features/patterns/PatternsPage";
+import { ConfidencePage } from "./features/confidence/ConfidencePage";
 
 /**
  * Application shell. A fixed sidebar drives navigation; screens are gated by
@@ -59,9 +61,16 @@ export function App() {
         {active === "applicants" && <ApplicantsPage />}
         {active === "timeline" && <TimelinePage />}
         {active === "graph" && <GraphPage />}
-        {!["overview", "applicants", "timeline", "graph"].includes(active) && (
-          <PlaceholderScreen id={active} />
-        )}
+        {active === "patterns" && <PatternsPage />}
+        {active === "confidence" && <ConfidencePage />}
+        {![
+          "overview",
+          "applicants",
+          "timeline",
+          "graph",
+          "patterns",
+          "confidence",
+        ].includes(active) && <PlaceholderScreen id={active} />}
       </main>
     </div>
   );

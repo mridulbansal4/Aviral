@@ -1,0 +1,46 @@
+# ---------------------------------------------------------------------------
+# Confidence Intelligence. Replaces a single High/Med/Low with five defined
+# sub-confidences aggregated into a Decision Confidence. Every function is
+# documented in idbi.services.confidence_service; the weights and the
+# normalization references that parameterize them live here — never hardcoded.
+#
+# Decision Confidence = Σ weight_i · sub_confidence_i  (weights sum to 1.0).
+# ---------------------------------------------------------------------------
+weights:
+  data: 0.15        # completeness & quality of the applicant's data
+  model: 0.30       # how decisively the model separates this applicant
+  graph: 0.15       # how much knowledge-graph structure supports them
+  pattern: 0.20     # how clearly they fall into a characterized pattern
+  temporal: 0.20    # length & steadiness of behavioural history
+
+normalization:
+  history_months: 12          # full window → months ratio = 1.0
+  expected_counterparties: 12 # graph coverage saturates here
+  min_transactions: 120       # ~10/month over the window
+  stability_reference: 12.0   # income_stability mapping to ~1.0
+
+bands:
+  - { min: 0.70, label: "Well-founded", tone: "positive" }
+  - { min: 0.45, label: "Qualified", tone: "warning" }
+  - { min: 0.0, label: "Tentative", tone: "muted" }
+
+# ---------------------------------------------------------------------------
+# Pattern discovery. Unsupervised clustering over a behavioural feature subset;
+# clusters whose conversion rate departs sharply from the base rate are the
+# "discovered patterns". Nothing about the outcome is used to form the clusters
+# — only to characterize them afterwards.
+# ---------------------------------------------------------------------------
+patterns:
+  clusters: 6
+  behaviour_features:
+    - salary_growth_3m
+    - savings_momentum
+    - income_stability
+    - dti_ratio
+    - builder_payment_recent
+    - medical_spend_ratio
+    - temporal_spending_momentum
+    - discretionary_ratio
+  # A cluster is "significant" (surfaced as a pattern) when its conversion rate
+  # differs from the base rate by at least this absolute margin.
+  significance_margin: 0.12

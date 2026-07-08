@@ -13,8 +13,8 @@ from typing import Any
 
 import yaml
 
-# apps/api/  (three parents up from apps/api/src/idbi/config/loader.py)
-API_ROOT = Path(__file__).resolve().parents[3]
+# backend/  (two parents up from backend/idbi/config/loader.py)
+API_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_DIR = API_ROOT / "config"
 
 

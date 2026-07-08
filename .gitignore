@@ -16,8 +16,8 @@ data/generated/
 
 # Node / frontend
 node_modules/
-apps/web/dist/
-apps/web/.vite/
+frontend/dist/
+frontend/.vite/
 
 # Editor / OS
 .vscode/

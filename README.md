@@ -9,34 +9,34 @@ This is **V2** of the prototype: the architecture and an honest read of the
 requirements (including what was over-scoped or would be misleading in a
 prototype) are in [`docs/adr/0001-architecture.md`](docs/adr/0001-architecture.md).
 
-## Monorepo layout
+## Layout
 
 ```
-apps/api/            FastAPI backend (domain-driven, config-driven)
-apps/web/            React + TypeScript + Vite frontend
-data/generator/      Seeded, causal synthetic-data generator (M1)
-packages/shared-types/  OpenAPI-generated TS types (single source of truth)
-docs/                ADRs, model card, confidence spec
+backend/     FastAPI backend — run with `uvicorn main:app --reload`
+frontend/    React + TypeScript + Vite — run with `npm run dev`
+docs/        ADRs (architecture decision records)
 ```
 
 ## Run it
 
-**Backend** (Python 3.12 + [uv](https://docs.astral.sh/uv/)):
+**Backend** (Python 3.12 + [uv](https://docs.astral.sh/uv/)) — from `backend/`:
 
 ```bash
-cd apps/api
+cd backend
 uv venv --python 3.12
-uv pip install -e ".[dev]"
-uv run uvicorn idbi.main:app --reload --app-dir src   # → http://127.0.0.1:8000/docs
+uv pip install -e ".[dev,ml]"
+uv run uvicorn main:app --reload        # → http://127.0.0.1:8000/docs
 ```
 
-**Frontend** (Node 20+):
+**Frontend** (Node 20+) — from `frontend/`, in a second terminal:
 
 ```bash
-cd apps/web
+cd frontend
 npm install
-npm run dev                                            # → http://localhost:5173
+npm run dev                             # → http://localhost:5173
 ```
+
+The frontend calls the API at `http://127.0.0.1:8000`, so start the backend first.
 
 ## Roadmap
 

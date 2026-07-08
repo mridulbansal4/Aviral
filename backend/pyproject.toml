@@ -37,12 +37,12 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/idbi"]
+packages = ["idbi"]
 
 [tool.ruff]
 line-length = 100
 target-version = "py312"
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["."]
 testpaths = ["tests"]

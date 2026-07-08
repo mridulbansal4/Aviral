@@ -23,11 +23,11 @@ export const NAV_ITEMS: NavItem[] = [
     description: "Platform status and capabilities",
   },
   {
-    id: "applicant",
-    label: "Applicant 360",
+    id: "applicants",
+    label: "Applicants",
     flag: null,
     milestone: "M2",
-    description: "Verified income, propensity and SHAP evidence for one applicant",
+    description: "Book of business, scored — drill into Applicant 360 with SHAP evidence",
   },
   {
     id: "timeline",

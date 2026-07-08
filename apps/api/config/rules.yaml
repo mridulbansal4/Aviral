@@ -1,0 +1,85 @@
+# ---------------------------------------------------------------------------
+# Deterministic lending rules. Banks require explainable, auditable rules
+# alongside the ML model — this file is their single source of truth. Each rule
+# compares one feature against a threshold; the engine reports pass/fail with a
+# plain-language rationale. No rule logic is hardcoded in Python.
+#
+# op ∈ {gte, lte, gt, lt, eq}. `weight` sets the rule's share of the rule score.
+# `polarity` = "positive" (passing is favourable) or "negative" (passing is a
+# risk flag), used only for UI colouring.
+# ---------------------------------------------------------------------------
+rules:
+  - id: verified_income_sufficient
+    label: "Verified income above floor"
+    feature: verified_monthly_income
+    op: gte
+    threshold: 35000
+    weight: 0.22
+    polarity: positive
+    rationale: "Verified monthly income of {value} clears the ₹{threshold} floor."
+
+  - id: stable_income
+    label: "Income is stable"
+    feature: income_stability
+    op: gte
+    threshold: 6.0
+    weight: 0.18
+    polarity: positive
+    rationale: "Income stability index {value} indicates dependable cash inflow."
+
+  - id: manageable_dti
+    label: "Debt service within limit"
+    feature: dti_ratio
+    op: lte
+    threshold: 0.35
+    weight: 0.20
+    polarity: positive
+    rationale: "EMI-to-income of {value} is within the 0.35 prudential limit."
+
+  - id: positive_savings_momentum
+    label: "Savings trending up"
+    feature: savings_momentum
+    op: gt
+    threshold: 0.0
+    weight: 0.15
+    polarity: positive
+    rationale: "Savings momentum {value} shows an improving liquidity trend."
+
+  - id: rising_income
+    label: "Income trajectory rising"
+    feature: salary_growth_3m
+    op: gte
+    threshold: 0.03
+    weight: 0.15
+    polarity: positive
+    rationale: "Recent income growth of {value} signals upward trajectory."
+
+  - id: elevated_medical_burden
+    label: "Elevated medical outflow"
+    feature: medical_spend_ratio
+    op: gte
+    threshold: 0.2
+    weight: 0.10
+    polarity: negative
+    rationale: "Medical spend at {value} of income may indicate a liquidity shock."
+
+# Recommended-product routing, evaluated top-down; first matching rule wins.
+product_routing:
+  - when_feature: builder_payment_recent
+    op: gte
+    threshold: 1.0
+    product: home_loan
+  - when_feature: medical_spend_ratio
+    op: gte
+    threshold: 0.2
+    product: personal_loan
+  - when_feature: salary_growth_3m
+    op: gte
+    threshold: 0.05
+    product: personal_loan
+
+# Propensity banding for the decision headline.
+bands:
+  - { min: 0.66, label: "High propensity", tone: "positive" }
+  - { min: 0.40, label: "Moderate propensity", tone: "warning" }
+  - { min: 0.0, label: "Low propensity", tone: "muted" }

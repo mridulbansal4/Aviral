@@ -94,11 +94,19 @@ export function OverviewPage() {
           </div>
           <div className="kv">
             <span className="kv__key">M1 · Causal data + features</span>
-            <span className="kv__val">next</span>
+            <span className="kv__val" style={{ color: "var(--color-positive)" }}>
+              done
+            </span>
           </div>
           <div className="kv">
             <span className="kv__key">M2 · Applicant 360 spine</span>
-            <span className="kv__val">planned</span>
+            <span className="kv__val" style={{ color: "var(--color-positive)" }}>
+              done
+            </span>
+          </div>
+          <div className="kv">
+            <span className="kv__key">M3 · Temporal + graph</span>
+            <span className="kv__val">next</span>
           </div>
         </div>
       </div>

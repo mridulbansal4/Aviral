@@ -4,6 +4,7 @@ import "./App.css";
 import { NAV_ITEMS } from "./app/navigation";
 import { useCapabilities } from "./lib/queries";
 import { OverviewPage } from "./features/overview/OverviewPage";
+import { ApplicantsPage } from "./features/applicants/ApplicantsPage";
 
 /**
  * Application shell. A fixed sidebar drives navigation; screens are gated by
@@ -52,9 +53,9 @@ export function App() {
       </aside>
 
       <main className="workspace">
-        {active === "overview" ? (
-          <OverviewPage />
-        ) : (
+        {active === "overview" && <OverviewPage />}
+        {active === "applicants" && <ApplicantsPage />}
+        {active !== "overview" && active !== "applicants" && (
           <PlaceholderScreen id={active} />
         )}
       </main>

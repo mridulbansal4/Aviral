@@ -40,3 +40,66 @@ export interface CapabilitiesResponse {
   version: string;
   flags: Record<string, boolean>;
 }
+
+export interface ApplicantSummary {
+  customer_id: string;
+  name: string;
+  age: number;
+  employment_type: string;
+  city_tier: string;
+  verified_monthly_income: number;
+  converted: boolean;
+  loan_type: string;
+}
+
+export interface RuleResult {
+  id: string;
+  label: string;
+  feature: string;
+  passed: boolean;
+  value: number;
+  threshold: number;
+  weight: number;
+  polarity: "positive" | "negative";
+  rationale: string;
+}
+
+export interface ShapEvidence {
+  feature: string;
+  value: number;
+  contribution: number;
+  direction: "increases" | "decreases";
+  provenance: string;
+}
+
+export interface Decision {
+  customer_id: string;
+  name: string;
+  verified_monthly_income: number;
+  propensity: number;
+  band: { label: string; tone: string };
+  model_confidence: number;
+  recommended_product: string;
+  rule_score: number;
+  rules: RuleResult[];
+  base_value: number;
+  evidence: ShapEvidence[];
+  model_version: string;
+  ground_truth: {
+    converted: boolean;
+    loan_type: string;
+    latent_probability: number;
+  };
+}
+
+export interface ModelCard {
+  version: string;
+  metrics: {
+    roc_auc: number;
+    ks_statistic: number;
+    lift_top_decile: number;
+    base_rate: number;
+    n_samples: number;
+  };
+  feature_importance: Record<string, number>;
+}

@@ -1,0 +1,49 @@
+# ---------------------------------------------------------------------------
+# Synthetic population generator. The design goal is HONEST signal: the loan
+# conversion label is drawn from a causal process whose drivers are only
+# *partially and noisily* observable through transactions. This keeps model
+# metrics (AUC, SHAP) meaningful instead of leaking the label.
+# ---------------------------------------------------------------------------
+population:
+  size: 400                 # number of synthetic customers
+  history_months: 12        # rolling window of transaction history
+
+# Base monthly income priors (INR) by employment type, before city adjustment.
+income:
+  salaried:
+    log_mean: 11.0          # ~ exp(11) ≈ ₹60k median
+    log_sigma: 0.45
+  self_employed:
+    log_mean: 11.1
+    log_sigma: 0.7          # wider, less stable
+  city_multiplier:
+    tier_1: 1.30
+    tier_2: 1.00
+    tier_3: 0.78
+
+# Latent trait distributions (Beta a,b) — never observed directly.
+latent:
+  discipline: [2.5, 2.0]        # savings behaviour & balance stability
+  home_intent_rate: 0.28        # P(customer is accumulating toward a home)
+  medical_shock_rate: 0.16      # P(a medical liquidity shock in the window)
+
+# ---------------------------------------------------------------------------
+# Causal label model. logit(convert) = bias + Σ weight_i · standardized_driver_i
+# Weights are the ground truth an honest model should approximately recover.
+# ---------------------------------------------------------------------------
+label:
+  bias: -1.15
+  weights:
+    salary_growth: 0.85         # recent income increase
+    savings_momentum: 0.75      # sustained rising balance
+    income_stability: 0.55      # steadier income → more confidence
+    builder_recent: 1.35        # active builder payments → home-loan intent
+    medical_shock: 1.05         # medical spend + liquidity drop → personal loan
+    dti: -0.95                  # high debt-to-income suppresses conversion
+  label_noise: 0.35             # logit-space Gaussian noise (keeps AUC realistic)
+
+# Loan-type assignment when a customer converts, by dominant driver.
+loan_type_priority:
+  - [builder_recent, home_loan]
+  - [medical_shock, personal_loan]
+  - [salary_growth, personal_loan]

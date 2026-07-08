@@ -20,8 +20,9 @@ ml = [
     "numpy>=2.1",
     "pandas>=2.2",
     "scikit-learn>=1.5",
+    # LightGBM computes exact tree SHAP values natively (predict pred_contrib=True),
+    # so we deliberately avoid the heavy `shap`/`numba`/`llvmlite` stack.
     "lightgbm>=4.5",
-    "shap>=0.46",
     "networkx>=3.4",
     "duckdb>=1.1",
 ]

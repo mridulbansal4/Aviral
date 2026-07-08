@@ -1,0 +1,24 @@
+# ---------------------------------------------------------------------------
+# Prohibited-feature registry (RBI fair-lending guardrail).
+#
+# The feature store REJECTS any feature whose name matches an entry here — both
+# the protected attributes themselves and known proxies. This is enforced in
+# code at the feature-store boundary, not left to reviewer vigilance.
+# ---------------------------------------------------------------------------
+prohibited:
+  # Protected attributes — never permissible as model inputs.
+  - gender
+  - religion
+  - caste
+  - marital_status
+  - ethnicity
+  # Known proxies that leak protected attributes.
+  - first_name
+  - surname
+  - area_pincode          # can proxy religion/caste via locality
+  - constituency
+
+# Attributes allowed but flagged for a fairness review before production use.
+review_required:
+  - age                   # permissible for tenure limits; monitor for bias
+  - city_tier

@@ -1,20 +1,21 @@
 /**
- * Relationship graph canvas. A deterministic radial hub-and-spoke layout: the
- * applicant sits at the centre, counterparties ring around them, and peer
- * customers cluster near the employer/builder hubs they share. Rendered as
- * inline SVG — no external graph library — so it stays self-contained and crisp.
+ * Relationship graph canvas. A deterministic radial layout: the applicant sits
+ * at the centre, counterparties ring around them, and peer customers sit on an
+ * outer ring — evenly spaced (ordered by the hub they share) so labels never
+ * clump. Labels fan outward along each node's radius to avoid collisions.
+ * Inline SVG only — no external graph library.
  */
 
 import { useMemo } from "react";
 
 import type { GraphEdge, GraphNode } from "../../lib/api";
 
-const W = 760;
-const H = 520;
+const W = 840;
+const H = 700;
 const CX = W / 2;
-const CY = H / 2;
-const R1 = 158; // counterparty ring
-const R2 = 236; // peer ring
+const CY = 340;
+const R1 = 182; // counterparty ring
+const R2 = 278; // peer ring
 
 const SUBTYPE_COLOR: Record<string, string> = {
   employer: "#4c8dff",
@@ -34,6 +35,7 @@ interface Placed {
   x: number;
   y: number;
   r: number;
+  angle: number;
 }
 
 export function GraphCanvas({
@@ -53,43 +55,56 @@ export function GraphCanvas({
     const peers = nodes.filter((n) => n.kind === "customer" && !n.is_focus);
 
     const pos = new Map<string, Placed>();
-    if (focus) pos.set(focus.id, { node: focus, x: CX, y: CY, r: 26 });
+    if (focus)
+      pos.set(focus.id, { node: focus, x: CX, y: CY, r: 27, angle: Math.PI / 2 });
 
+    // Inner ring: counterparties evenly spaced, grouped by subtype.
     const angleOf = new Map<string, number>();
     counterparties.forEach((cp, i) => {
-      const angle = (i / Math.max(1, counterparties.length)) * Math.PI * 2 - Math.PI / 2;
+      const angle =
+        (i / Math.max(1, counterparties.length)) * Math.PI * 2 - Math.PI / 2;
       angleOf.set(cp.id, angle);
       pos.set(cp.id, {
         node: cp,
         x: CX + R1 * Math.cos(angle),
         y: CY + R1 * Math.sin(angle),
         r: 13,
+        angle,
       });
     });
 
-    // Peers cluster near the hub they connect to.
+    // Which hub each peer connects to (used only for ordering).
     const peerHub = new Map<string, string>();
     for (const e of edges) {
       const s = nodes.find((n) => n.id === e.source);
       if (s && s.kind === "customer" && !s.is_focus) peerHub.set(e.source, e.target);
     }
-    const hubPeerIndex = new Map<string, number>();
-    peers.forEach((p) => {
-      const hub = peerHub.get(p.id);
-      const base = hub ? (angleOf.get(hub) ?? 0) : Math.random() * Math.PI * 2;
-      const k = hubPeerIndex.get(hub ?? "") ?? 0;
-      hubPeerIndex.set(hub ?? "", k + 1);
-      const angle = base + (k - 1.5) * 0.16;
-      pos.set(p.id, {
-        node: p,
+
+    // Outer ring: peers ordered by their hub's angle, then spread EVENLY around
+    // the full circle so names never cluster. The +0.5 phase keeps them off the
+    // inner spokes.
+    const ordered = [...peers].sort(
+      (a, b) =>
+        (angleOf.get(peerHub.get(a.id) ?? "") ?? 0) -
+        (angleOf.get(peerHub.get(b.id) ?? "") ?? 0),
+    );
+    const n = Math.max(1, ordered.length);
+    ordered.forEach((peer, i) => {
+      const angle = ((i + 0.5) / n) * Math.PI * 2 - Math.PI / 2;
+      pos.set(peer.id, {
+        node: peer,
         x: CX + R2 * Math.cos(angle),
         y: CY + R2 * Math.sin(angle),
         r: 9,
+        angle,
       });
     });
 
     return { placed: [...pos.values()], positioned: pos };
   }, [nodes, edges]);
+
+  const truncate = (s: string, n = 16) =>
+    s.length > n ? s.slice(0, n - 1) + "…" : s;
 
   return (
     <svg
@@ -112,16 +127,36 @@ export function GraphCanvas({
             x2={b.x}
             y2={b.y}
             stroke={fromFocus ? "var(--color-border-strong)" : "var(--color-border)"}
-            strokeWidth={fromFocus ? 1.5 : 1}
-            opacity={fromFocus ? 0.9 : 0.5}
+            strokeWidth={fromFocus ? 1.4 : 1}
+            opacity={fromFocus ? 0.85 : 0.4}
           />
         );
       })}
 
-      {/* nodes */}
+      {/* nodes + outward-fanned labels */}
       {placed.map((p) => {
         const color = SUBTYPE_COLOR[p.node.subtype] ?? "var(--color-text-muted)";
         const isPeer = p.node.kind === "customer" && !p.node.is_focus;
+
+        if (p.node.is_focus) {
+          return (
+            <g key={p.node.id} className="graph-node">
+              <circle cx={p.x} cy={p.y} r={p.r + 6} fill="none" stroke={color} opacity={0.25} />
+              <circle cx={p.x} cy={p.y} r={p.r} fill="var(--color-accent)" stroke={color} strokeWidth={2.5} />
+              <text x={p.x} y={p.y + p.r + 16} className="graph-label graph-label--focus" textAnchor="middle">
+                {p.node.label}
+              </text>
+            </g>
+          );
+        }
+
+        // Label placed radially outward; anchor flips by side to avoid overlap.
+        const cos = Math.cos(p.angle);
+        const sin = Math.sin(p.angle);
+        const lx = p.x + cos * (p.r + 8);
+        const ly = p.y + sin * (p.r + 8);
+        const anchor = cos > 0.25 ? "start" : cos < -0.25 ? "end" : "middle";
+
         return (
           <g
             key={p.node.id}
@@ -132,20 +167,18 @@ export function GraphCanvas({
               cx={p.x}
               cy={p.y}
               r={p.r}
-              fill={p.node.is_focus ? "var(--color-accent)" : "var(--color-surface-raised)"}
+              fill={isPeer ? "var(--color-surface)" : "var(--color-surface-raised)"}
               stroke={color}
-              strokeWidth={p.node.is_focus ? 2.5 : 1.5}
+              strokeWidth={1.5}
             />
-            {p.node.is_focus && (
-              <circle cx={p.x} cy={p.y} r={p.r + 6} fill="none" stroke={color} opacity={0.3} />
-            )}
             <text
-              x={p.x}
-              y={p.y + p.r + 12}
-              className="graph-label"
-              textAnchor="middle"
+              x={lx}
+              y={ly}
+              className={isPeer ? "graph-label graph-label--peer" : "graph-label"}
+              textAnchor={anchor}
+              dominantBaseline="middle"
             >
-              {p.node.label.length > 14 ? p.node.label.slice(0, 13) + "…" : p.node.label}
+              {truncate(p.node.label)}
             </text>
             <title>
               {p.node.label} · {p.node.subtype.replace("_", " ")}

@@ -6,16 +6,39 @@
 }
 
 .picker {
-  background: var(--color-surface-raised);
+  /* strip the native chrome and draw our own themed control */
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: var(--color-surface-raised);
+  /* custom chevron (muted stroke) */
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239aa3b2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
+  border-radius: 10px;
   color: var(--color-text);
-  padding: var(--space-2) var(--space-3);
-  min-width: 240px;
+  font-size: var(--text-sm);
+  padding: var(--space-2) 36px var(--space-2) var(--space-4);
+  min-width: 260px;
+  cursor: pointer;
   outline: none;
+  transition:
+    border-color var(--duration-fast) var(--ease-out),
+    background-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
+}
+.picker:hover {
+  border-color: var(--color-border-strong);
+  background-color: var(--color-surface-overlay);
 }
 .picker:focus {
   border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-subtle);
+}
+/* the open list — themed where the OS allows it */
+.picker option {
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 .chart {

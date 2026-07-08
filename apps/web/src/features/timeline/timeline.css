@@ -1,0 +1,99 @@
+.workspace__header--row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.picker {
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  padding: var(--space-2) var(--space-3);
+  min-width: 240px;
+  outline: none;
+}
+.picker:focus {
+  border-color: var(--color-accent);
+}
+
+.chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.chart__ytick {
+  fill: var(--color-text-muted);
+  font-size: 11px;
+  text-anchor: end;
+  font-family: var(--font-mono);
+}
+.chart__xtick {
+  fill: var(--color-text-muted);
+  font-size: 10px;
+  text-anchor: middle;
+  font-family: var(--font-mono);
+}
+
+.chart-legend,
+.graph-legend {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-top: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  margin-right: var(--space-1);
+}
+.dot--accent {
+  background: var(--color-accent);
+}
+.dot--warning {
+  background: var(--color-warning);
+}
+.dot--positive {
+  background: var(--color-positive);
+}
+
+/* metric grid */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+.metric {
+  border: 1px solid var(--color-border);
+  border-left-width: 3px;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-raised);
+}
+.metric--positive {
+  border-left-color: var(--color-positive);
+}
+.metric--warning {
+  border-left-color: var(--color-warning);
+}
+.metric--muted {
+  border-left-color: var(--color-border-strong);
+}
+.metric__value {
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-semibold);
+}
+.metric__label {
+  font-size: var(--text-sm);
+  margin-top: 2px;
+}
+.metric__prov {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}

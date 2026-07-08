@@ -12,6 +12,7 @@ from functools import lru_cache
 
 from idbi.domain.models import ApplicantSummary, CustomerRecord, FeatureVector
 from idbi.features.store import FeatureStore
+from idbi.graph import KnowledgeGraph, compute_graph_features
 from idbi.observability import get_logger
 from idbi.repositories.population import (
     InMemoryPopulationRepository,
@@ -33,13 +34,24 @@ class PopulationService:
         self.repository = repository or InMemoryPopulationRepository()
         self.feature_store = feature_store or FeatureStore()
         self._features: dict[str, FeatureVector] = {}
+        self.graph: KnowledgeGraph | None = None
         self._generate()
 
     def _generate(self) -> None:
         records = SyntheticPopulation(seed=self.seed).generate()
         self.repository.upsert_many(records)
+
+        # Build the knowledge graph once; graph features (if enabled) are derived
+        # from it and injected into each feature vector.
+        self.graph = KnowledgeGraph(records)
         for record in records:
-            self._features[record.customer.id] = self.feature_store.build(record)
+            gf = (
+                compute_graph_features(self.graph, record.customer.id)
+                if self.feature_store.graph_enabled
+                else None
+            )
+            self._features[record.customer.id] = self.feature_store.build(record, gf)
+
         converted = sum(1 for r in records if r.outcome.converted)
         log.info(
             "population.generated",
@@ -47,6 +59,8 @@ class PopulationService:
             customers=len(records),
             converted=converted,
             conversion_rate=round(converted / max(1, len(records)), 3),
+            features=len(self.feature_store.feature_names()),
+            graph=self.graph.summary(),
         )
 
     # -- queries ---------------------------------------------------------------

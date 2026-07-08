@@ -19,6 +19,6 @@ def test_capabilities_exposes_flags():
     resp = client.get("/api/v1/capabilities")
     assert resp.status_code == 200
     flags = resp.json()["flags"]
-    # Flags exist and are all off at M0 (features arrive in later milestones).
+    # Flags are exposed as a bool map; features switch on as milestones land.
     assert "knowledge_graph" in flags
-    assert all(v is False for v in flags.values())
+    assert all(isinstance(v, bool) for v in flags.values())

@@ -5,6 +5,8 @@ import { NAV_ITEMS } from "./app/navigation";
 import { useCapabilities } from "./lib/queries";
 import { OverviewPage } from "./features/overview/OverviewPage";
 import { ApplicantsPage } from "./features/applicants/ApplicantsPage";
+import { TimelinePage } from "./features/timeline/TimelinePage";
+import { GraphPage } from "./features/graph/GraphPage";
 
 /**
  * Application shell. A fixed sidebar drives navigation; screens are gated by
@@ -55,7 +57,9 @@ export function App() {
       <main className="workspace">
         {active === "overview" && <OverviewPage />}
         {active === "applicants" && <ApplicantsPage />}
-        {active !== "overview" && active !== "applicants" && (
+        {active === "timeline" && <TimelinePage />}
+        {active === "graph" && <GraphPage />}
+        {!["overview", "applicants", "timeline", "graph"].includes(active) && (
           <PlaceholderScreen id={active} />
         )}
       </main>

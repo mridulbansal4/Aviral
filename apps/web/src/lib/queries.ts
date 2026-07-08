@@ -7,8 +7,10 @@ import {
   type ApplicantSummary,
   type CapabilitiesResponse,
   type Decision,
+  type GraphResponse,
   type HealthResponse,
   type ModelCard,
+  type TimelineResponse,
 } from "./api";
 
 export function useHealth() {
@@ -45,5 +47,21 @@ export function useModelCard() {
   return useQuery({
     queryKey: ["model-card"],
     queryFn: () => apiGet<ModelCard>("/model/card"),
+  });
+}
+
+export function useTimeline(customerId: string | null) {
+  return useQuery({
+    queryKey: ["timeline", customerId],
+    queryFn: () => apiGet<TimelineResponse>(`/applicants/${customerId}/timeline`),
+    enabled: !!customerId,
+  });
+}
+
+export function useGraph(customerId: string | null) {
+  return useQuery({
+    queryKey: ["graph", customerId],
+    queryFn: () => apiGet<GraphResponse>(`/applicants/${customerId}/graph`),
+    enabled: !!customerId,
   });
 }

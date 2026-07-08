@@ -5,15 +5,21 @@ features. Its most important job is the **prohibited-feature guard**: every
 feature name is checked against the RBI fair-lending registry
 (``config/prohibited_features.yaml``) before it can enter a feature vector.
 Compliance is enforced in code here, not left to reviewer vigilance.
+
+Feature families are composed by feature flag: the base family is always on;
+temporal (M3) and graph (M3) families switch on via ``feature_flags.yaml``.
+Graph features require the knowledge graph, so they are injected at build time.
 """
 
 from __future__ import annotations
 
 from functools import lru_cache
 
-from idbi.config.loader import load_yaml
+from idbi.config.loader import is_enabled, load_yaml
 from idbi.domain.models import CustomerRecord, FeatureVector
 from idbi.features.definitions import FEATURE_DEFS
+from idbi.features.temporal import TEMPORAL_FEATURE_DEFS
+from idbi.graph.features import GRAPH_FEATURE_NAMES, GRAPH_FEATURE_PROVENANCE
 from idbi.observability import get_logger
 
 log = get_logger("idbi.features")
@@ -39,12 +45,17 @@ class FeatureStore:
     def __init__(self) -> None:
         self.prohibited = _prohibited()
         self.review_required = _review_required()
+        self.temporal_enabled = is_enabled("temporal_features")
+        self.graph_enabled = is_enabled("knowledge_graph")
+        self._defs = list(FEATURE_DEFS)
+        if self.temporal_enabled:
+            self._defs += TEMPORAL_FEATURE_DEFS
         self._validate_registry()
 
     def _validate_registry(self) -> None:
         """Fail fast at startup if any defined feature is prohibited."""
-        for defn in FEATURE_DEFS:
-            self.assert_allowed(defn.name)
+        for name in self.feature_names():
+            self.assert_allowed(name)
 
     def assert_allowed(self, name: str) -> None:
         if name in self.prohibited:
@@ -54,16 +65,31 @@ class FeatureStore:
             )
 
     def feature_names(self) -> list[str]:
-        return [d.name for d in FEATURE_DEFS]
+        names = [d.name for d in self._defs]
+        if self.graph_enabled:
+            names += GRAPH_FEATURE_NAMES
+        return names
 
-    def build(self, record: CustomerRecord) -> FeatureVector:
+    def build(
+        self,
+        record: CustomerRecord,
+        graph_features: dict[str, float] | None = None,
+    ) -> FeatureVector:
         features: dict[str, float] = {}
         provenance: dict[str, str] = {}
-        for defn in FEATURE_DEFS:
+        for defn in self._defs:
             self.assert_allowed(defn.name)  # defence in depth
             value, prov = defn.fn(record)
             features[defn.name] = float(value)
             provenance[defn.name] = prov
+
+        if self.graph_enabled:
+            gf = graph_features or {name: 0.0 for name in GRAPH_FEATURE_NAMES}
+            for name in GRAPH_FEATURE_NAMES:
+                self.assert_allowed(name)
+                features[name] = float(gf.get(name, 0.0))
+                provenance[name] = GRAPH_FEATURE_PROVENANCE.get(name, "graph feature")
+
         return FeatureVector(
             customer_id=record.customer.id,
             features=features,

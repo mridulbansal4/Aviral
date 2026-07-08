@@ -4,8 +4,8 @@
 # on independently. Flags default to the milestone that delivers them.
 # ---------------------------------------------------------------------------
 flags:
-  temporal_features: false      # M3
-  knowledge_graph: false        # M3
+  temporal_features: true       # M3
+  knowledge_graph: true         # M3
   pattern_discovery: false      # M4
   confidence_intelligence: false # M4
   compliance_engine: false      # M5

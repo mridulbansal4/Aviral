@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 
 import "../applicant/applicant.css";
 import { inr, num, pct, titleCase } from "../../design-system/format";
+import { useActiveApplicant } from "../../app/ApplicantContext";
 import { useApplicants, useModelCard } from "../../lib/queries";
 import { Applicant360 } from "../applicant/Applicant360";
 
@@ -39,10 +40,16 @@ function ModelStrip() {
 }
 
 export function ApplicantsPage() {
-  const [selected, setSelected] = useState<string | null>(null);
+  const { id: selected, setId: setSelected } = useActiveApplicant();
+  const [showDetail, setShowDetail] = useState(false);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("outcome");
   const { data, isLoading } = useApplicants();
+
+  const openApplicant = (id: string) => {
+    setSelected(id);
+    setShowDetail(true);
+  };
 
   const rows = useMemo(() => {
     let r = data ?? [];
@@ -62,9 +69,12 @@ export function ApplicantsPage() {
     });
   }, [data, query, sort]);
 
-  if (selected) {
+  if (showDetail && selected) {
     return (
-      <Applicant360 customerId={selected} onBack={() => setSelected(null)} />
+      <Applicant360
+        customerId={selected}
+        onBack={() => setShowDetail(false)}
+      />
     );
   }
 
@@ -117,7 +127,7 @@ export function ApplicantsPage() {
             </thead>
             <tbody>
               {rows.map((a) => (
-                <tr key={a.customer_id} onClick={() => setSelected(a.customer_id)}>
+                <tr key={a.customer_id} onClick={() => openApplicant(a.customer_id)}>
                   <td>
                     <div className="atable__name">{a.name}</div>
                     <div className="atable__id">{a.customer_id}</div>

@@ -103,3 +103,48 @@ export interface ModelCard {
   };
   feature_importance: Record<string, number>;
 }
+
+export interface InsightMetric {
+  key: string;
+  label: string;
+  value: number;
+  provenance: string;
+  tone: "positive" | "warning" | "muted";
+}
+
+export interface TimelinePoint {
+  month: string;
+  income: number;
+  total_spend: number;
+  net_savings: number;
+  categories: Record<string, number>;
+}
+
+export interface TimelineResponse {
+  customer_id: string;
+  points: TimelinePoint[];
+  metrics: InsightMetric[];
+}
+
+export interface GraphNode {
+  id: string;
+  label: string;
+  kind: string;
+  subtype: string;
+  is_focus: boolean;
+}
+
+export interface GraphEdge {
+  source: string;
+  target: string;
+  edge_type: string;
+  total: number;
+  count: number;
+}
+
+export interface GraphResponse {
+  customer_id: string;
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  features: InsightMetric[];
+}

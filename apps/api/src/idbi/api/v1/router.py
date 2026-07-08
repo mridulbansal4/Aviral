@@ -11,6 +11,7 @@ from fastapi import APIRouter
 from idbi.api.v1 import (
     applicants,
     decisions,
+    governance,
     health,
     insights,
     intelligence,
@@ -22,5 +23,6 @@ api_router.include_router(applicants.router)
 api_router.include_router(decisions.router)
 api_router.include_router(insights.router)
 api_router.include_router(intelligence.router)
+api_router.include_router(governance.router)
 
 __all__ = ["api_router"]

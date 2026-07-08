@@ -58,6 +58,13 @@ export const NAV_ITEMS: NavItem[] = [
     description: "Data, model, graph, pattern and temporal confidence",
   },
   {
+    id: "governance",
+    label: "Governance",
+    flag: "compliance_engine",
+    milestone: "M5",
+    description: "Model card, fair-lending guardrails and AA consent posture",
+  },
+  {
     id: "learning",
     label: "Learning Dashboard",
     flag: "continuous_learning",

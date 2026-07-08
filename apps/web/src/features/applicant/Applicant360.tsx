@@ -6,12 +6,25 @@
  * judged against reality.
  */
 
+import "../offer/offer.css";
 import { Gauge } from "../../design-system/Gauge";
 import { StatusBadge } from "../../design-system/StatusBadge";
 import { inr, pct, titleCase } from "../../design-system/format";
-import { useDecision } from "../../lib/queries";
+import { useConsent, useDecision } from "../../lib/queries";
+import { OfferPanel } from "../offer/OfferPanel";
 import { RulesPanel } from "./RulesPanel";
 import { ShapChart } from "./ShapChart";
+
+function ConsentChip({ customerId }: { customerId: string }) {
+  const { data } = useConsent(customerId);
+  if (!data) return null;
+  return (
+    <span className={`consent-chip consent-chip--${data.status}`} title={data.purpose}>
+      <span className="consent-chip__dot" />
+      AA consent {data.status}
+    </span>
+  );
+}
 
 export function Applicant360({
   customerId,
@@ -42,7 +55,10 @@ export function Applicant360({
             {d.customer_id} · Model {d.model_version}
           </p>
         </div>
-        <span className={`pill pill--${d.band.tone}`}>{d.band.label}</span>
+        <div style={{ display: "flex", gap: "var(--space-3)", alignItems: "center" }}>
+          <ConsentChip customerId={customerId} />
+          <span className={`pill pill--${d.band.tone}`}>{d.band.label}</span>
+        </div>
       </header>
 
       {/* headline row */}
@@ -118,6 +134,15 @@ export function Applicant360({
           <div className="card__hint">Deterministic, auditable checks</div>
           <RulesPanel rules={d.rules} />
         </div>
+      </div>
+
+      {/* orchestrated offer */}
+      <div className="card" style={{ marginTop: "var(--space-4)" }}>
+        <div className="card__title">Orchestrated offer</div>
+        <div className="card__hint">
+          Risk-based, FOIR-aware and consent-gated
+        </div>
+        <OfferPanel customerId={customerId} />
       </div>
     </div>
   );

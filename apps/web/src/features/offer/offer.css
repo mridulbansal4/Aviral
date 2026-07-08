@@ -1,0 +1,127 @@
+.offer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.offer__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.offer__product {
+  font-size: var(--text-md);
+  font-weight: var(--font-weight-semibold);
+}
+.offer__band {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+.offer__terms {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-3);
+}
+.offer__principal {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.02em;
+}
+.offer__sub {
+  color: var(--color-text-secondary);
+  margin-top: var(--space-1);
+}
+.offer__sub b {
+  color: var(--color-text);
+}
+.offer__cap {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-2);
+}
+
+.offer__foir-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-2);
+}
+.offer__foir-bar {
+  position: relative;
+  height: 10px;
+  background: var(--color-surface-overlay);
+  border-radius: 999px;
+}
+.offer__foir-before,
+.offer__foir-after {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 999px;
+}
+.offer__foir-before {
+  background: var(--color-border-strong);
+  z-index: 1;
+}
+.offer__foir-after {
+  background: linear-gradient(90deg, var(--color-accent), #7b5cff);
+  opacity: 0.85;
+  z-index: 0;
+}
+.offer__foir-limit {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  background: var(--color-negative);
+  z-index: 2;
+}
+
+.offer__cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-3);
+}
+.offer__coltitle {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
+}
+.offer__check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+}
+.offer__check-label {
+  font-size: var(--text-sm);
+}
+
+/* consent chip in the 360 header */
+.consent-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-3);
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+}
+.consent-chip__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+}
+.consent-chip--active .consent-chip__dot {
+  background: var(--color-positive);
+}
+.consent-chip--expired .consent-chip__dot,
+.consent-chip--revoked .consent-chip__dot {
+  background: var(--color-negative);
+}

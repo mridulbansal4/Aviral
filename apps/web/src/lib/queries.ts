@@ -6,11 +6,15 @@ import {
   apiGet,
   type ApplicantSummary,
   type CapabilitiesResponse,
+  type ComplianceSummary,
   type ConfidenceReport,
+  type Consent,
   type Decision,
   type GraphResponse,
   type HealthResponse,
   type ModelCard,
+  type ModelCard2,
+  type Offer,
   type Pattern,
   type PatternMatch,
   type TimelineResponse,
@@ -89,5 +93,35 @@ export function usePatternMatch(customerId: string | null) {
     queryKey: ["pattern-match", customerId],
     queryFn: () => apiGet<PatternMatch>(`/applicants/${customerId}/pattern`),
     enabled: !!customerId,
+  });
+}
+
+export function useOffer(customerId: string | null) {
+  return useQuery({
+    queryKey: ["offer", customerId],
+    queryFn: () => apiGet<Offer>(`/applicants/${customerId}/offer`),
+    enabled: !!customerId,
+  });
+}
+
+export function useConsent(customerId: string | null) {
+  return useQuery({
+    queryKey: ["consent", customerId],
+    queryFn: () => apiGet<Consent>(`/applicants/${customerId}/consent`),
+    enabled: !!customerId,
+  });
+}
+
+export function useModelCard2() {
+  return useQuery({
+    queryKey: ["model-card-full"],
+    queryFn: () => apiGet<ModelCard2>("/compliance/model-card"),
+  });
+}
+
+export function useComplianceSummary() {
+  return useQuery({
+    queryKey: ["compliance-summary"],
+    queryFn: () => apiGet<ComplianceSummary>("/compliance/summary"),
   });
 }

@@ -1,0 +1,38 @@
+# ---------------------------------------------------------------------------
+# Lending products and risk-based pricing. Offer orchestration is fully
+# config-driven: eligibility limits (FOIR), income multiples, tenures and base
+# rates live here, as does the risk spread applied by confidence band. No
+# pricing or policy number is hardcoded in Python.
+# ---------------------------------------------------------------------------
+
+# Fixed-Obligations-to-Income Ratio ceiling after the new EMI (RBI-aligned).
+foir_limit: 0.50
+
+# Minimum verified monthly income to be considered at all (INR).
+min_monthly_income: 20000
+
+products:
+  home_loan:
+    label: "Home Loan"
+    max_income_multiple: 60      # principal cap ≈ 5× annual income
+    tenure_months: [120, 180, 240]
+    base_rate: 0.086
+    min_principal: 500000
+  personal_loan:
+    label: "Personal Loan"
+    max_income_multiple: 12
+    tenure_months: [12, 24, 36, 48]
+    base_rate: 0.135
+    min_principal: 50000
+  auto_loan:
+    label: "Auto Loan"
+    max_income_multiple: 30
+    tenure_months: [36, 48, 60]
+    base_rate: 0.104
+    min_principal: 150000
+
+# Risk-based pricing: a spread added to the base rate by decision-confidence band.
+risk_pricing:
+  - { min_confidence: 0.66, label: "Prime", spread: -0.008 }
+  - { min_confidence: 0.45, label: "Standard", spread: 0.006 }
+  - { min_confidence: 0.0, label: "Elevated", spread: 0.022 }

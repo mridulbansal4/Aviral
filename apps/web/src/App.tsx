@@ -9,6 +9,7 @@ import { TimelinePage } from "./features/timeline/TimelinePage";
 import { GraphPage } from "./features/graph/GraphPage";
 import { PatternsPage } from "./features/patterns/PatternsPage";
 import { ConfidencePage } from "./features/confidence/ConfidencePage";
+import { GovernancePage } from "./features/governance/GovernancePage";
 
 /**
  * Application shell. A fixed sidebar drives navigation; screens are gated by
@@ -63,6 +64,7 @@ export function App() {
         {active === "graph" && <GraphPage />}
         {active === "patterns" && <PatternsPage />}
         {active === "confidence" && <ConfidencePage />}
+        {active === "governance" && <GovernancePage />}
         {![
           "overview",
           "applicants",
@@ -70,6 +72,7 @@ export function App() {
           "graph",
           "patterns",
           "confidence",
+          "governance",
         ].includes(active) && <PlaceholderScreen id={active} />}
       </main>
     </div>

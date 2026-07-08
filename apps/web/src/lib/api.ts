@@ -190,3 +190,63 @@ export interface PatternMatch {
   precision: number;
   lift: number;
 }
+
+export interface Consent {
+  consent_handle: string;
+  customer_id: string;
+  purpose: string;
+  data_scope: string[];
+  fetch_type: string;
+  granted_on: string;
+  expires_on: string;
+  status: "active" | "expired" | "revoked";
+}
+
+export interface EligibilityCheck {
+  id: string;
+  label: string;
+  passed: boolean;
+  detail: string;
+}
+
+export interface Offer {
+  customer_id: string;
+  product: string;
+  product_label: string;
+  status: "approved_in_principle" | "referred" | "declined";
+  principal: number;
+  tenure_months: number;
+  annual_rate: number;
+  monthly_emi: number;
+  foir_before: number;
+  foir_after: number;
+  risk_band: string;
+  decision_confidence: number;
+  max_principal_by_income: number;
+  max_principal_by_foir: number;
+  consent_status: "active" | "expired" | "revoked";
+  pricing: { label: string; value: string }[];
+  checks: EligibilityCheck[];
+}
+
+export interface ModelCard2 {
+  model_version: string;
+  purpose: string;
+  training_population: number;
+  used_features: string[];
+  prohibited_features: string[];
+  review_required_features: string[];
+  metrics: Record<string, number>;
+  fairness_statement: string;
+  limitations: string[];
+}
+
+export interface ComplianceSummary {
+  model_version: string;
+  total_applicants: number;
+  consent_active: number;
+  consent_expired: number;
+  consent_revoked: number;
+  prohibited_feature_count: number;
+  used_feature_count: number;
+}

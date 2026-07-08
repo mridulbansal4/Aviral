@@ -8,6 +8,6 @@ flags:
   knowledge_graph: true         # M3
   pattern_discovery: true       # M4
   confidence_intelligence: true # M4
-  compliance_engine: false      # M5
-  offer_orchestration: false    # M5
+  compliance_engine: true       # M5
+  offer_orchestration: true     # M5
   continuous_learning: false    # M6 — simulated outcomes, always labelled as such

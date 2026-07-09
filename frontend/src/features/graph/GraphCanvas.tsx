@@ -1,191 +1,188 @@
-/**
- * Relationship graph canvas. A deterministic radial layout: the applicant sits
- * at the centre, counterparties ring around them, and peer customers sit on an
- * outer ring — evenly spaced (ordered by the hub they share) so labels never
- * clump. Labels fan outward along each node's radius to avoid collisions.
- * Inline SVG only — no external graph library.
- */
-
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
+import {
+  ReactFlow,
+  useNodesState,
+  useEdgesState,
+  Background,
+  Controls,
+  Handle,
+  Position,
+} from "@xyflow/react";
+import type { Node, Edge } from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
 
 import type { GraphEdge, GraphNode } from "../../lib/api";
-
-const W = 840;
-const H = 700;
-const CX = W / 2;
-const CY = 340;
-const R1 = 182; // counterparty ring
-const R2 = 278; // peer ring
+import { Tooltip } from "../../design-system/Tooltip";
 
 const SUBTYPE_COLOR: Record<string, string> = {
-  employer: "#4c8dff",
-  builder: "#b57bff",
-  lender: "#e0a53b",
-  hospital: "#e5484d",
-  merchant: "#5b93a8",
-  amc: "#2fbf71",
-  utility: "#6b7280",
-  landlord: "#8a94a6",
-  salaried: "#e6e9ef",
-  self_employed: "#e6e9ef",
+  employer:      "#3b82f6",
+  builder:       "#a855f7",
+  lender:        "#f59e0b",
+  hospital:      "#ef4444",
+  merchant:      "#06b6d4",
+  amc:           "#22c55e",
+  utility:       "#6b7280",
+  landlord:      "#a1a1aa",
+  salaried:      "#e4e4e7",
+  self_employed: "#e4e4e7",
 };
 
-interface Placed {
-  node: GraphNode;
-  x: number;
-  y: number;
-  r: number;
-  angle: number;
+// Sharp Enterprise Node — radial layout, Palantir Foundry style
+function EnterpriseNode({ data }: { data: any }) {
+  const color = SUBTYPE_COLOR[data.subtype] ?? "#52525b";
+  const isFocus = data.is_focus;
+  const isPeer = data.kind === "customer" && !isFocus;
+
+  return (
+    <Tooltip content={`${data.label} · ${data.subtype.replace(/_/g, " ")}`}>
+      <div style={{
+        background: isFocus ? "#0f1729" : "#0d0d0d",
+        border: isFocus ? `1px solid #3b82f6` : `1px solid rgba(255,255,255,0.08)`,
+        borderLeft: isFocus ? `3px solid #3b82f6` : `3px solid ${color}`,
+        borderRadius: "3px",
+        padding: "6px 10px",
+        minWidth: "100px",
+        fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+        cursor: isPeer ? "pointer" : "default",
+        boxSizing: "border-box",
+      }}>
+        <Handle type="target" position={Position.Top}    style={{ opacity: 0 }} />
+        <Handle type="source" position={Position.Bottom} style={{ opacity: 0 }} />
+
+        {/* Entity type badge */}
+        <div style={{
+          fontSize: "8px",
+          textTransform: "uppercase",
+          letterSpacing: "0.08em",
+          color: isFocus ? "#60a5fa" : color,
+          marginBottom: "3px",
+          fontWeight: 700,
+        }}>
+          {data.subtype.replace(/_/g, " ")}
+        </div>
+
+        {/* Label */}
+        <div style={{
+          fontSize: "11px",
+          fontWeight: isFocus ? 700 : 500,
+          color: isFocus ? "#e2e8f0" : "#a1a1aa",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          letterSpacing: "-0.01em",
+        }}>
+          {data.label.length > 18 ? data.label.slice(0, 17) + "…" : data.label}
+        </div>
+      </div>
+    </Tooltip>
+  );
 }
 
+const nodeTypes = { enterprise: EnterpriseNode };
+
 export function GraphCanvas({
-  nodes,
-  edges,
+  nodes: initialNodes,
+  edges: initialEdges,
   onSelectPeer,
 }: {
   nodes: GraphNode[];
   edges: GraphEdge[];
   onSelectPeer: (id: string) => void;
 }) {
-  const { placed, positioned } = useMemo(() => {
-    const focus = nodes.find((n) => n.is_focus);
-    const counterparties = nodes
-      .filter((n) => n.kind === "counterparty")
-      .sort((a, b) => a.subtype.localeCompare(b.subtype));
-    const peers = nodes.filter((n) => n.kind === "customer" && !n.is_focus);
+  const { rfNodes, rfEdges } = useMemo(() => {
+    const focus         = initialNodes.find((n) => n.is_focus);
+    const counterparties= initialNodes.filter((n) => n.kind === "counterparty");
+    const peers         = initialNodes.filter((n) => n.kind === "customer" && !n.is_focus);
 
-    const pos = new Map<string, Placed>();
-    if (focus)
-      pos.set(focus.id, { node: focus, x: CX, y: CY, r: 27, angle: Math.PI / 2 });
+    const cx = 400, cy = 300;
+    const mappedNodes: Node[] = [];
 
-    // Inner ring: counterparties evenly spaced, grouped by subtype.
-    const angleOf = new Map<string, number>();
-    counterparties.forEach((cp, i) => {
-      const angle =
-        (i / Math.max(1, counterparties.length)) * Math.PI * 2 - Math.PI / 2;
-      angleOf.set(cp.id, angle);
-      pos.set(cp.id, {
-        node: cp,
-        x: CX + R1 * Math.cos(angle),
-        y: CY + R1 * Math.sin(angle),
-        r: 13,
-        angle,
-      });
-    });
-
-    // Which hub each peer connects to (used only for ordering).
-    const peerHub = new Map<string, string>();
-    for (const e of edges) {
-      const s = nodes.find((n) => n.id === e.source);
-      if (s && s.kind === "customer" && !s.is_focus) peerHub.set(e.source, e.target);
+    if (focus) {
+      mappedNodes.push({ id: focus.id, type: "enterprise", position: { x: cx - 55, y: cy - 20 }, data: focus });
     }
 
-    // Outer ring: peers ordered by their hub's angle, then spread EVENLY around
-    // the full circle so names never cluster. The +0.5 phase keeps them off the
-    // inner spokes.
-    const ordered = [...peers].sort(
-      (a, b) =>
-        (angleOf.get(peerHub.get(a.id) ?? "") ?? 0) -
-        (angleOf.get(peerHub.get(b.id) ?? "") ?? 0),
-    );
-    const n = Math.max(1, ordered.length);
-    ordered.forEach((peer, i) => {
-      const angle = ((i + 0.5) / n) * Math.PI * 2 - Math.PI / 2;
-      pos.set(peer.id, {
-        node: peer,
-        x: CX + R2 * Math.cos(angle),
-        y: CY + R2 * Math.sin(angle),
-        r: 9,
-        angle,
+    const r1 = 190;
+    counterparties.forEach((cp, i) => {
+      const angle = (i / Math.max(1, counterparties.length)) * Math.PI * 2 - Math.PI / 2;
+      mappedNodes.push({
+        id: cp.id, type: "enterprise",
+        position: { x: cx + r1 * Math.cos(angle) - 55, y: cy + r1 * Math.sin(angle) - 20 },
+        data: cp,
       });
     });
 
-    return { placed: [...pos.values()], positioned: pos };
-  }, [nodes, edges]);
+    const r2 = 340;
+    peers.forEach((peer, i) => {
+      const angle = (i / Math.max(1, peers.length)) * Math.PI * 2 - Math.PI / 2;
+      mappedNodes.push({
+        id: peer.id, type: "enterprise",
+        position: { x: cx + r2 * Math.cos(angle) - 55, y: cy + r2 * Math.sin(angle) - 20 },
+        data: peer,
+      });
+    });
 
-  const truncate = (s: string, n = 16) =>
-    s.length > n ? s.slice(0, n - 1) + "…" : s;
+    const mappedEdges: Edge[] = initialEdges.map((e, i) => {
+      const fromFocus =
+        initialNodes.find((n) => n.id === e.source)?.is_focus ||
+        initialNodes.find((n) => n.id === e.target)?.is_focus;
+      return {
+        id: `e${i}`,
+        source: e.source,
+        target: e.target,
+        type: "straight",
+        animated: fromFocus,
+        style: {
+          stroke: fromFocus ? "rgba(59,130,246,0.5)" : "rgba(255,255,255,0.06)",
+          strokeWidth: fromFocus ? 1.5 : 1,
+          strokeDasharray: fromFocus ? undefined : "4 4",
+        },
+      };
+    });
+
+    return { rfNodes: mappedNodes, rfEdges: mappedEdges };
+  }, [initialNodes, initialEdges]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(rfNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(rfEdges);
+
+  const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
+    if (node.data.kind === "customer" && !node.data.is_focus) {
+      onSelectPeer(node.id as string);
+    }
+  }, [onSelectPeer]);
 
   return (
-    <svg
-      className="graph-canvas"
-      viewBox={`0 0 ${W} ${H}`}
-      preserveAspectRatio="xMidYMid meet"
-      role="img"
-    >
-      {/* edges */}
-      {edges.map((e, i) => {
-        const a = positioned.get(e.source);
-        const b = positioned.get(e.target);
-        if (!a || !b) return null;
-        const fromFocus = a.node.is_focus || b.node.is_focus;
-        return (
-          <line
-            key={i}
-            x1={a.x}
-            y1={a.y}
-            x2={b.x}
-            y2={b.y}
-            stroke={fromFocus ? "var(--color-border-strong)" : "var(--color-border)"}
-            strokeWidth={fromFocus ? 1.4 : 1}
-            opacity={fromFocus ? 0.85 : 0.4}
-          />
-        );
-      })}
-
-      {/* nodes + outward-fanned labels */}
-      {placed.map((p) => {
-        const color = SUBTYPE_COLOR[p.node.subtype] ?? "var(--color-text-muted)";
-        const isPeer = p.node.kind === "customer" && !p.node.is_focus;
-
-        if (p.node.is_focus) {
-          return (
-            <g key={p.node.id} className="graph-node">
-              <circle cx={p.x} cy={p.y} r={p.r + 6} fill="none" stroke={color} opacity={0.25} />
-              <circle cx={p.x} cy={p.y} r={p.r} fill="var(--color-accent)" stroke={color} strokeWidth={2.5} />
-              <text x={p.x} y={p.y + p.r + 16} className="graph-label graph-label--focus" textAnchor="middle">
-                {p.node.label}
-              </text>
-            </g>
-          );
-        }
-
-        // Label placed radially outward; anchor flips by side to avoid overlap.
-        const cos = Math.cos(p.angle);
-        const sin = Math.sin(p.angle);
-        const lx = p.x + cos * (p.r + 8);
-        const ly = p.y + sin * (p.r + 8);
-        const anchor = cos > 0.25 ? "start" : cos < -0.25 ? "end" : "middle";
-
-        return (
-          <g
-            key={p.node.id}
-            className={isPeer ? "graph-node graph-node--peer" : "graph-node"}
-            onClick={() => isPeer && onSelectPeer(p.node.id)}
-          >
-            <circle
-              cx={p.x}
-              cy={p.y}
-              r={p.r}
-              fill={isPeer ? "var(--color-surface)" : "var(--color-surface-raised)"}
-              stroke={color}
-              strokeWidth={1.5}
-            />
-            <text
-              x={lx}
-              y={ly}
-              className={isPeer ? "graph-label graph-label--peer" : "graph-label"}
-              textAnchor={anchor}
-              dominantBaseline="middle"
-            >
-              {truncate(p.node.label)}
-            </text>
-            <title>
-              {p.node.label} · {p.node.subtype.replace("_", " ")}
-            </title>
-          </g>
-        );
-      })}
-    </svg>
+    <div style={{
+      width: "100%", height: "600px",
+      background: "#050505",
+      borderRadius: "var(--radius-md)",
+      border: "1px solid rgba(255,255,255,0.07)",
+    }}>
+      <style>{`
+        .react-flow__node { background: transparent !important; border: none !important; padding: 0 !important; border-radius: 0 !important; }
+        .react-flow__attribution { display: none; }
+        .react-flow__controls { background: #111 !important; border: 1px solid rgba(255,255,255,0.07) !important; border-radius: 3px !important; box-shadow: none !important; }
+        .react-flow__controls-button { background: #111 !important; border-bottom: 1px solid rgba(255,255,255,0.05) !important; }
+        .react-flow__controls-button:hover { background: #1a1a1a !important; }
+        .react-flow__controls-button svg { fill: #52525b !important; }
+      `}</style>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onNodeClick={onNodeClick}
+        nodeTypes={nodeTypes}
+        colorMode="dark"
+        fitView
+        fitViewOptions={{ padding: 0.12 }}
+        minZoom={0.2}
+        maxZoom={2}
+        proOptions={{ hideAttribution: true }}
+      >
+        <Background color="rgba(255,255,255,0.025)" gap={24} size={1} />
+        <Controls showInteractive={false} />
+      </ReactFlow>
+    </div>
   );
 }

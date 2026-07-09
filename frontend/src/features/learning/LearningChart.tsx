@@ -32,8 +32,8 @@ export function LearningChart({ history }: { history: LearningStep[] }) {
       {yTicks.map((v) => (
         <g key={v}>
           <line x1={PAD.left} x2={W - PAD.right} y1={y(v)} y2={y(v)}
-            stroke="var(--color-border)" strokeDasharray="2 3" />
-          <text x={PAD.left - 8} y={y(v) + 3} className="chart__ytick">
+            stroke="rgba(255,255,255,0.07)" strokeDasharray="2 3" />
+          <text x={PAD.left - 8} y={y(v) + 3} className="chart__ytick" fill="#71717a">
             {num(v, 2)}
           </text>
         </g>
@@ -44,17 +44,17 @@ export function LearningChart({ history }: { history: LearningStep[] }) {
         <circle key={`ghost-${s}`} cx={x(s)} cy={y(yMin)} r={0} />
       ))}
 
-      <polyline points={path} fill="none" stroke="var(--color-accent)" strokeWidth={2.5} />
+      <polyline points={path} fill="none" stroke="#2563eb" strokeWidth={2.5} />
       {history.map((h) => (
         <g key={h.step}>
-          <circle cx={x(h.step)} cy={y(h.roc_auc)} r={4} fill="var(--color-accent)" />
-          <text x={x(h.step)} y={y(h.roc_auc) - 10} className="chart__point">
+          <circle cx={x(h.step)} cy={y(h.roc_auc)} r={4} fill="#2563eb" />
+          <text x={x(h.step)} y={y(h.roc_auc) - 10} className="chart__point" fill="#ededed">
             {num(h.roc_auc, 3)}
           </text>
-          <text x={x(h.step)} y={H - 22} className="chart__xtick">
+          <text x={x(h.step)} y={H - 22} className="chart__xtick" fill="#71717a">
             R{h.step}
           </text>
-          <text x={x(h.step)} y={H - 8} className="chart__xsub">
+          <text x={x(h.step)} y={H - 8} className="chart__xsub" fill="#52525b">
             {h.train_size}
           </text>
         </g>

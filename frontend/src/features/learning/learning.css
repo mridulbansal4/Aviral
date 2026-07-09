@@ -90,13 +90,13 @@
   cursor: not-allowed;
 }
 .btn--primary {
-  background: var(--color-accent);
+  background: #2563eb;
   border-color: transparent;
-  color: white;
+  color: #ffffff;
   font-weight: var(--font-weight-medium);
 }
 .btn--primary:hover:not(:disabled) {
-  background: var(--color-accent-hover);
+  background: #1d4ed8;
 }
 .learn-step {
   margin-left: auto;

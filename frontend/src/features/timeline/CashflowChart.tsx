@@ -1,109 +1,144 @@
-/**
- * Cashflow chart — monthly net-savings bars with income and spend overlaid as
- * lines. Pure inline SVG (viewBox-scaled) so it stays crisp and dependency-free.
- */
-
+import { useEffect, useRef } from "react";
+import { createChart, ColorType, HistogramSeries, LineSeries } from "lightweight-charts";
+import type { IChartApi, ISeriesApi } from "lightweight-charts";
 import type { TimelinePoint } from "../../lib/api";
-import { inr } from "../../design-system/format";
-
-const W = 720;
-const H = 260;
-const PAD = { top: 20, right: 16, bottom: 28, left: 56 };
 
 export function CashflowChart({ points }: { points: TimelinePoint[] }) {
-  if (!points.length) return null;
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const chartRef = useRef<IChartApi | null>(null);
 
-  const plotW = W - PAD.left - PAD.right;
-  const plotH = H - PAD.top - PAD.bottom;
+  useEffect(() => {
+    if (!chartContainerRef.current || !points.length) return;
 
-  const maxVal = Math.max(...points.flatMap((p) => [p.income, p.total_spend]));
-  const minNet = Math.min(0, ...points.map((p) => p.net_savings));
-  const maxNet = Math.max(...points.map((p) => p.net_savings));
-  const top = Math.max(maxVal, maxNet);
-  const bottom = Math.min(0, minNet);
-  const range = top - bottom || 1;
+    // Convert API points to TradingView format
+    // Since points just have "Jan 24", we need to map them to actual dates for lightweight-charts
+    // For simplicity, we just use string times or simple indexes if dates aren't full.
+    // Lightweight charts requires YYYY-MM-DD for string times.
+    const tvData = points.map((p) => {
+      let time: string;
+      // Handle both "YYYY-MM" and "Mon YY" formats
+      if (/^\d{4}-\d{2}$/.test(p.month)) {
+        // Already YYYY-MM, just append day
+        time = `${p.month}-01`;
+      } else {
+        // "Jan 25" or "Jan 2025" style
+        const parts = p.month.split(" ");
+        const monthMap: Record<string, string> = {
+          Jan: "01", Feb: "02", Mar: "03", Apr: "04", May: "05", Jun: "06",
+          Jul: "07", Aug: "08", Sep: "09", Oct: "10", Nov: "11", Dec: "12"
+        };
+        const mon = monthMap[parts[0]] || "01";
+        const yr = parts[1]?.length === 2 ? `20${parts[1]}` : (parts[1] || "2025");
+        time = `${yr}-${mon}-01`;
+      }
+      return {
+        time,
+        income: p.income,
+        spend: p.total_spend,
+        net: p.net_savings,
+        originalLabel: p.month
+      };
+    });
 
-  const x = (i: number) =>
-    PAD.left + (i + 0.5) * (plotW / points.length);
-  const y = (v: number) => PAD.top + plotH * (1 - (v - bottom) / range);
-  const barW = (plotW / points.length) * 0.5;
+    const chart = createChart(chartContainerRef.current, {
+      layout: {
+        background: { type: ColorType.Solid, color: "transparent" },
+        textColor: "rgba(255, 255, 255, 0.5)",
+        fontFamily: "var(--font-mono)",
+      },
+      grid: {
+        vertLines: { color: "rgba(255, 255, 255, 0.05)", style: 3 }, // Dotted
+        horzLines: { color: "rgba(255, 255, 255, 0.05)", style: 3 },
+      },
+      rightPriceScale: {
+        borderVisible: false,
+      },
+      timeScale: {
+        borderVisible: false,
+        timeVisible: true,
+        tickMarkFormatter: (time: string) => {
+          const match = tvData.find(d => d.time === time);
+          return match ? match.originalLabel : time;
+        }
+      },
+      crosshair: {
+        mode: 1, // Magnet mode
+        vertLine: {
+          color: "rgba(255, 255, 255, 0.2)",
+          width: 1,
+          style: 3,
+        },
+        horzLine: {
+          color: "rgba(255, 255, 255, 0.2)",
+          width: 1,
+          style: 3,
+        },
+      },
+      handleScroll: false,
+      handleScale: false,
+    });
+    
+    chartRef.current = chart;
 
-  const line = (key: "income" | "total_spend") =>
-    points.map((p, i) => `${x(i)},${y(p[key])}`).join(" ");
+    // 1. Histogram for Net Savings
+    const netSeries = chart.addSeries(HistogramSeries, {
+      priceFormat: { type: "volume" },
+      priceScaleId: "right",
+    });
+    
+    netSeries.setData(
+      tvData.map(d => ({
+        time: d.time,
+        value: d.net,
+        color: d.net >= 0 ? "rgba(46, 204, 113, 0.3)" : "rgba(231, 76, 60, 0.3)"
+      }))
+    );
 
-  const yZero = y(0);
-  const gridVals = [top, top / 2, 0].filter((v, i, a) => a.indexOf(v) === i);
+    // 2. Line for Income
+    const incomeSeries = chart.addSeries(LineSeries, {
+      color: "#3b82f6", // Accent blue
+      lineWidth: 2,
+      crosshairMarkerVisible: true,
+      crosshairMarkerRadius: 4,
+    });
+    
+    incomeSeries.setData(tvData.map(d => ({ time: d.time, value: d.income })));
+
+    // 3. Line for Spend
+    const spendSeries = chart.addSeries(LineSeries, {
+      color: "#f59e0b", // Warning amber
+      lineWidth: 2,
+      lineStyle: 2, // Dashed
+      crosshairMarkerVisible: true,
+      crosshairMarkerRadius: 4,
+    });
+
+    spendSeries.setData(tvData.map(d => ({ time: d.time, value: d.spend })));
+
+    chart.timeScale().fitContent();
+
+    return () => {
+      chart.remove();
+    };
+  }, [points]);
 
   return (
-    <svg
-      className="chart"
-      viewBox={`0 0 ${W} ${H}`}
-      preserveAspectRatio="xMidYMid meet"
-      role="img"
-    >
-      {/* gridlines + y labels */}
-      {gridVals.map((v) => (
-        <g key={v}>
-          <line
-            x1={PAD.left}
-            x2={W - PAD.right}
-            y1={y(v)}
-            y2={y(v)}
-            stroke="var(--color-border)"
-            strokeDasharray="2 3"
-          />
-          <text x={PAD.left - 8} y={y(v) + 3} className="chart__ytick">
-            {inr(v, true)}
-          </text>
-        </g>
-      ))}
-
-      {/* net-savings bars */}
-      {points.map((p, i) => {
-        const positive = p.net_savings >= 0;
-        const yTop = y(Math.max(0, p.net_savings));
-        const h = Math.abs(y(p.net_savings) - yZero);
-        return (
-          <rect
-            key={p.month}
-            x={x(i) - barW / 2}
-            y={yTop}
-            width={barW}
-            height={Math.max(1, h)}
-            rx={2}
-            fill={positive ? "var(--color-positive)" : "var(--color-negative)"}
-            opacity={0.28}
-          >
-            <title>
-              {p.month} · net {inr(p.net_savings)}
-            </title>
-          </rect>
-        );
-      })}
-
-      {/* income + spend lines */}
-      <polyline
-        points={line("income")}
-        fill="none"
-        stroke="var(--color-accent)"
-        strokeWidth={2}
+    <div style={{ width: "100%", marginTop: "var(--space-4)" }}>
+      <div 
+        ref={chartContainerRef} 
+        style={{ width: "100%", height: "260px" }} 
       />
-      <polyline
-        points={line("total_spend")}
-        fill="none"
-        stroke="var(--color-warning)"
-        strokeWidth={2}
-        strokeDasharray="4 3"
-      />
-
-      {/* x labels (every other month) */}
-      {points.map((p, i) =>
-        i % 2 === 0 ? (
-          <text key={p.month} x={x(i)} y={H - 8} className="chart__xtick">
-            {p.month.slice(2)}
-          </text>
-        ) : null,
-      )}
-    </svg>
+      <div className="chart-legend" style={{ display: "flex", gap: "16px", justifyContent: "center", marginTop: "16px", fontSize: "12px", color: "var(--color-text-secondary)", fontFamily: "var(--font-mono)" }}>
+        <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <div style={{ width: 8, height: 2, background: "#3b82f6" }} /> Income
+        </span>
+        <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <div style={{ width: 8, height: 2, background: "#f59e0b" }} /> Spend
+        </span>
+        <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <div style={{ width: 8, height: 8, borderRadius: "2px", background: "rgba(46, 204, 113, 0.3)" }} /> Net Savings
+        </span>
+      </div>
+    </div>
   );
 }

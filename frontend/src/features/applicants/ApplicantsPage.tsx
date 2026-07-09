@@ -1,9 +1,14 @@
-/**
- * Applicants workspace — a searchable, sortable book of business with a live
- * model-quality strip, and master→detail navigation into Applicant 360.
- */
-
 import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
+import { Search, ChevronRight, ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  flexRender,
+  createColumnHelper,
+} from "@tanstack/react-table";
+import type { SortingState } from "@tanstack/react-table";
 
 import "../applicant/applicant.css";
 import { inr, num, pct, titleCase } from "../../design-system/format";
@@ -11,7 +16,7 @@ import { useActiveApplicant } from "../../app/ApplicantContext";
 import { useApplicants, useModelCard } from "../../lib/queries";
 import { Applicant360 } from "../applicant/Applicant360";
 
-type SortKey = "name" | "income" | "outcome";
+const columnHelper = createColumnHelper<any>();
 
 function ModelStrip() {
   const { data } = useModelCard();
@@ -43,7 +48,8 @@ export function ApplicantsPage() {
   const { id: selected, setId: setSelected } = useActiveApplicant();
   const [showDetail, setShowDetail] = useState(false);
   const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<SortKey>("outcome");
+  const [sorting, setSorting] = useState<SortingState>([{ id: "outcome", desc: true }]);
+  
   const { data, isLoading } = useApplicants();
 
   const openApplicant = (id: string) => {
@@ -51,23 +57,77 @@ export function ApplicantsPage() {
     setShowDetail(true);
   };
 
-  const rows = useMemo(() => {
+  const filteredData = useMemo(() => {
     let r = data ?? [];
     if (query.trim()) {
       const q = query.toLowerCase();
       r = r.filter(
         (a) =>
           a.name.toLowerCase().includes(q) ||
-          a.customer_id.toLowerCase().includes(q),
+          a.customer_id.toLowerCase().includes(q)
       );
     }
-    return [...r].sort((a, b) => {
-      if (sort === "name") return a.name.localeCompare(b.name);
-      if (sort === "income")
-        return b.verified_monthly_income - a.verified_monthly_income;
-      return Number(b.converted) - Number(a.converted);
-    });
-  }, [data, query, sort]);
+    return r;
+  }, [data, query]);
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("name", {
+        header: "Applicant",
+        cell: (info) => (
+          <div>
+            <div className="atable__name">{info.getValue()}</div>
+            <div className="atable__id">{info.row.original.customer_id}</div>
+          </div>
+        ),
+      }),
+      columnHelper.accessor("city_tier", {
+        header: "Profile",
+        cell: (info) => {
+          const a = info.row.original;
+          return (
+            <div className="atable__muted">
+              {a.age} · {titleCase(a.employment_type)} · {a.city_tier.replace("_", " ")}
+            </div>
+          );
+        },
+      }),
+      columnHelper.accessor("verified_monthly_income", {
+        header: () => <div style={{ textAlign: "right" }}>Verified Income</div>,
+        cell: (info) => <div className="atable__num tabular">{inr(info.getValue())}</div>,
+      }),
+      columnHelper.accessor("outcome", {
+        header: "Outcome",
+        id: "outcome",
+        sortingFn: (rowA, rowB) => {
+          return Number(rowA.original.converted) - Number(rowB.original.converted);
+        },
+        cell: (info) => {
+          const a = info.row.original;
+          if (a.converted) {
+            return <span className="tag tag--positive">{titleCase(a.loan_type)}</span>;
+          }
+          return <span className="tag tag--muted">No loan</span>;
+        },
+      }),
+      columnHelper.display({
+        id: "actions",
+        cell: () => <div className="atable__chev"><ChevronRight size={16} /></div>,
+      })
+    ],
+    []
+  );
+
+  const table = useReactTable({
+    data: filteredData,
+    columns,
+    state: {
+      sorting,
+    },
+    onSortingChange: setSorting,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
 
   if (showDetail && selected) {
     return (
@@ -90,70 +150,78 @@ export function ApplicantsPage() {
       <ModelStrip />
 
       <div className="table-toolbar">
-        <input
-          className="input"
-          placeholder="Search name or ID…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <div className="segmented">
-          {(["outcome", "income", "name"] as SortKey[]).map((k) => (
-            <button
-              key={k}
-              className={`segmented__btn ${
-                sort === k ? "segmented__btn--active" : ""
-              }`}
-              onClick={() => setSort(k)}
-            >
-              {titleCase(k)}
-            </button>
-          ))}
+        <div style={{ position: "relative", display: "inline-block" }}>
+          <Search size={16} style={{ position: "absolute", left: "10px", top: "50%", transform: "translateY(-50%)", color: "var(--color-text-muted)" }} />
+          <input
+            className="input"
+            style={{ paddingLeft: "36px" }}
+            placeholder="Search name or ID…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
         </div>
       </div>
 
       {isLoading ? (
         <div className="empty">Loading applicants…</div>
       ) : (
-        <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+        <motion.div 
+          initial={{ opacity: 0, y: 4 }} 
+          animate={{ opacity: 1, y: 0 }} 
+          transition={{ duration: 0.2, delay: 0.1 }}
+          className="table-container"
+        >
           <table className="atable">
             <thead>
-              <tr>
-                <th>Applicant</th>
-                <th>Profile</th>
-                <th className="atable__num">Verified income</th>
-                <th>Outcome</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((a) => (
-                <tr key={a.customer_id} onClick={() => openApplicant(a.customer_id)}>
-                  <td>
-                    <div className="atable__name">{a.name}</div>
-                    <div className="atable__id">{a.customer_id}</div>
-                  </td>
-                  <td className="atable__muted">
-                    {a.age} · {titleCase(a.employment_type)} ·{" "}
-                    {a.city_tier.replace("_", " ")}
-                  </td>
-                  <td className="atable__num tabular">
-                    {inr(a.verified_monthly_income)}
-                  </td>
-                  <td>
-                    {a.converted ? (
-                      <span className="tag tag--positive">
-                        {titleCase(a.loan_type)}
-                      </span>
-                    ) : (
-                      <span className="tag tag--muted">No loan</span>
-                    )}
-                  </td>
-                  <td className="atable__chev">›</td>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th 
+                      key={header.id} 
+                      onClick={header.column.getToggleSortingHandler()}
+                      style={{ cursor: header.column.getCanSort() ? "pointer" : "default" }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "4px", justifyContent: header.column.id === "verified_monthly_income" ? "flex-end" : "flex-start" }}>
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                        {{
+                          asc: <ArrowUp size={12} />,
+                          desc: <ArrowDown size={12} />,
+                        }[header.column.getIsSorted() as string] ?? (header.column.getCanSort() && <ArrowUpDown size={12} style={{ opacity: 0.3 }} />)}
+                      </div>
+                    </th>
+                  ))}
                 </tr>
               ))}
-            </tbody>
+            </thead>
+            <motion.tbody
+              initial="hidden"
+              animate="show"
+              variants={{
+                show: { transition: { staggerChildren: 0.02 } }
+              }}
+            >
+              {table.getRowModel().rows.map((row) => (
+                <motion.tr 
+                  key={row.id} 
+                  onClick={() => openApplicant(row.original.customer_id)}
+                  variants={{
+                    hidden: { opacity: 0, x: -10 },
+                    show: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 500, damping: 40 } }
+                  }}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </motion.tr>
+              ))}
+            </motion.tbody>
           </table>
-        </div>
+        </motion.div>
       )}
     </>
   );

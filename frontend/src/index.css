@@ -17,13 +17,17 @@ body,
 
 body {
   font-family: var(--font-sans);
-  font-size: var(--text-base);
+  font-size: var(--text-sm);
   line-height: 1.5;
   color: var(--color-text);
-  background: var(--color-canvas);
+  background-color: var(--color-canvas);
+  background-image: var(--ambient-bg);
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  transition: background-color var(--duration-base) var(--ease-out),
+              color var(--duration-base) var(--ease-out);
 }
 
 a {
@@ -37,7 +41,8 @@ button {
 }
 
 ::selection {
-  background: var(--color-accent-subtle);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
 /* Numeric data should align and read as data, not prose. */

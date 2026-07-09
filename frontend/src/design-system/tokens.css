@@ -1,79 +1,84 @@
 /* ==========================================================================
-   Design tokens — the single source of visual truth.
-   
-   Luminous Enterprise Design System
+   Design tokens — Palantir/Bloomberg-Grade Enterprise Platform
    ========================================================================== */
 :root {
-  /* ---- Canvas & surfaces (Glassmorphism Light) ---- */
-  --color-canvas: #faf8fe;
-  --color-surface: rgba(255, 255, 255, 0.7);
-  --color-surface-solid: #ffffff;
-  --color-surface-raised: #f4f3f8;
-  --color-surface-overlay: rgba(255, 255, 255, 0.9);
-  --color-border: rgba(0, 0, 0, 0.05);
-  --color-border-strong: #dad9df;
-  --color-border-glass: rgba(255, 255, 255, 0.8);
+  /* ---- Canvas & Surfaces (Extremely muted, almost absolute blacks and greys) ---- */
+  --color-canvas: #0a0a0a;
+  --color-surface: #121212;
+  --color-surface-solid: #161616;
+  --color-surface-raised: #1c1c1c;
+  --color-surface-overlay: rgba(18, 18, 18, 0.85);
+  
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-strong: rgba(255, 255, 255, 0.12);
 
-  /* ---- Text ---- */
-  --color-text: #1a1b1f;
-  --color-text-secondary: #5f5e60;
-  --color-text-muted: #86868B;
+  /* Typography Colors (Hierarchy driven) */
+  --color-text: #ededed;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #71717a;
 
-  /* ---- Accent (single, confident IDBI Green) ---- */
-  --color-accent: #006845;
-  --color-accent-hover: #004e32;
-  --color-accent-subtle: rgba(0, 104, 69, 0.12);
-  --color-on-accent: #ffffff;
+  /* Primary Action */
+  --color-accent: #ffffff;
+  --color-accent-hover: #f4f4f5;
+  --color-accent-subtle: rgba(255, 255, 255, 0.05);
+  --color-on-accent: #000000;
+  
+  /* Strict Semantic State Colors (Only used when communicating state) */
+  --color-positive: #22c55e;
+  --color-warning: #f59e0b;
+  --color-negative: #ef4444;
+  --color-info: #3b82f6;
+  
+  --color-positive-subtle: rgba(34, 197, 94, 0.1);
+  --color-warning-subtle: rgba(245, 158, 11, 0.1);
+  --color-negative-subtle: rgba(239, 68, 68, 0.1);
+  --color-info-subtle: rgba(59, 130, 246, 0.1);
 
-  /* ---- Semantic signal ---- */
-  --color-positive: #006845;
-  --color-warning: #e0a53b;
-  --color-negative: #ba1a1a;
-  --color-info: #006845;
-  --color-positive-subtle: rgba(0, 104, 69, 0.12);
-  --color-warning-subtle: rgba(224, 165, 59, 0.12);
-  --color-negative-subtle: #ffdad6;
+  /* Ambient Invisible Shadows (Cards separate by spacing, not huge drops) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
+  --shadow-glow-subtle: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 2px 8px rgba(0, 0, 0, 0.4);
 
   /* ---- Typography ---- */
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: "JetBrains Mono", "SF Mono", "Cascadia Code", Consolas, monospace;
-  --text-xs: 0.75rem;     /* 12px */
-  --text-sm: 0.8125rem;   /* 13px */
-  --text-base: 0.875rem;  /* 14px */
-  --text-md: 1rem;        /* 16px */
-  --text-lg: 1.125rem;    /* 18px */
-  --text-xl: 1.5rem;      /* 24px */
-  --text-2xl: 2rem;       /* 32px */
-  --text-3xl: 3rem;       /* 48px */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", "SF Mono", Menlo, Consolas, monospace;
+  
+  --text-xs: 0.75rem;     /* 12px - Metadata */
+  --text-sm: 0.875rem;    /* 14px - Standard UI */
+  --text-md: 1rem;        /* 16px - Emphasized UI */
+  --text-lg: 1.125rem;    /* 18px - Subheaders */
+  --text-xl: 1.5rem;      /* 24px - Section Headers */
+  --text-2xl: 2rem;       /* 32px - Primary Headers */
+  --text-3xl: 2.5rem;     /* 40px - KPIs */
+
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
 
-  /* ---- Spacing ---- */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;       /* 16px (margin-md) */
-  --space-5: 1.5rem;     /* 24px (gutter) */
-  --space-6: 2rem;       /* 32px (margin-lg) */
-  --space-8: 4rem;       /* 64px (margin-xl) */
+  /* ---- Strict 8px Grid Spacing ---- */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+  --space-8: 64px;
   
-  --container-padding-desktop: 40px;
-  --container-padding-mobile: 20px;
+  --container-padding-desktop: 32px; 
+  --container-padding-mobile: 16px;
 
-  /* ---- Radius & elevation ---- */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.75rem;  /* 12px for buttons */
-  --radius-lg: 1.5rem;   /* 24px for main cards */
-  --radius-full: 9999px;
-  
-  --shadow-sm: 0 4px 24px -4px rgba(0, 0, 0, 0.02);
-  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.08);
+  /* ---- Strict Enterprise Radius (Max 12px) ---- */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-full: 9999px; /* For badges only */
 
-  /* ---- Motion ---- */
+  /* ---- Motion (Meaningful, Swift, Linear) ---- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --duration-fast: 150ms;
-  --duration-base: 300ms;
+  --duration-base: 220ms; 
 }

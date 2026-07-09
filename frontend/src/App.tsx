@@ -1,78 +1,39 @@
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import "./App.css";
 import { NAV_ITEMS } from "./app/navigation";
 import { useCapabilities, useHealth } from "./lib/queries";
+import { Toaster } from "sonner";
+import { CommandMenu } from "./app/CommandMenu";
+
+import {
+  LayoutDashboard,
+  Users,
+  History,
+  Network,
+  Sparkles,
+  ShieldCheck,
+  Scale,
+  BrainCircuit,
+} from "lucide-react";
 
 /** Line icons per screen — keeps the sidebar reading as a real console. */
 function NavIcon({ id }: { id: string }) {
-  const paths: Record<string, React.ReactNode> = {
-    overview: (
-      <>
-        <rect x="3" y="3" width="7" height="7" rx="1.5" />
-        <rect x="14" y="3" width="7" height="7" rx="1.5" />
-        <rect x="14" y="14" width="7" height="7" rx="1.5" />
-        <rect x="3" y="14" width="7" height="7" rx="1.5" />
-      </>
-    ),
-    applicants: (
-      <>
-        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-      </>
-    ),
-    timeline: <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />,
-    graph: (
-      <>
-        <circle cx="18" cy="5" r="3" />
-        <circle cx="6" cy="12" r="3" />
-        <circle cx="18" cy="19" r="3" />
-        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-      </>
-    ),
-    patterns: (
-      <>
-        <path d="M12 3l1.9 4.9L18.9 10l-5 2.1L12 17l-1.9-4.9L5.1 10l5-2.1L12 3z" />
-      </>
-    ),
-    confidence: (
-      <>
-        <circle cx="12" cy="12" r="9" />
-        <circle cx="12" cy="12" r="5" />
-        <circle cx="12" cy="12" r="1.4" />
-      </>
-    ),
-    governance: (
-      <>
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-        <polyline points="9 12 11 14 15 10" />
-      </>
-    ),
-    learning: (
-      <>
-        <path d="M21 4v6h-6" />
-        <path d="M18.5 15a8 8 0 1 1-1.9-8.3L21 10" />
-      </>
-    ),
+  const icons: Record<string, React.ReactNode> = {
+    overview: <LayoutDashboard size={16} />,
+    applicants: <Users size={16} />,
+    timeline: <History size={16} />,
+    graph: <Network size={16} />,
+    patterns: <Sparkles size={16} />,
+    confidence: <ShieldCheck size={16} />,
+    governance: <Scale size={16} />,
+    learning: <BrainCircuit size={16} />,
   };
   return (
-    <svg
-      className="nav__icon"
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.9"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      {paths[id]}
-    </svg>
+    <div className="nav__icon" aria-hidden="true">
+      {icons[id]}
+    </div>
   );
 }
 import { OverviewPage } from "./features/overview/OverviewPage";
@@ -91,13 +52,17 @@ import { LearningPage } from "./features/learning/LearningPage";
  */
 export function App() {
   const [active, setActive] = useState("overview");
+  
   const caps = useCapabilities();
   const flags = caps.data?.flags ?? {};
 
   const isUnlocked = (flag: string | null) => flag === null || !!flags[flag];
 
   return (
-    <div className="shell">
+    <>
+      <Toaster theme="dark" position="bottom-right" className="enterprise-toaster" />
+      <CommandMenu />
+      <div className="shell">
       <aside className="sidebar">
         <div className="brand">
           <div className="brand__mark">
@@ -111,13 +76,11 @@ export function App() {
           </div>
           <div>
             <div className="brand__name">Aviral</div>
-            <div className="brand__sub">Adaptive Lending</div>
           </div>
         </div>
 
         <nav className="nav">
           <div className="nav__section">
-            <span className="nav__section-line" />
             <span className="nav__section-label">Console</span>
           </div>
           {NAV_ITEMS.map((item) => {
@@ -145,26 +108,38 @@ export function App() {
       </aside>
 
       <main className="workspace">
-        {active === "overview" && <OverviewPage />}
-        {active === "applicants" && <ApplicantsPage />}
-        {active === "timeline" && <TimelinePage />}
-        {active === "graph" && <GraphPage />}
-        {active === "patterns" && <PatternsPage />}
-        {active === "confidence" && <ConfidencePage />}
-        {active === "governance" && <GovernancePage />}
-        {active === "learning" && <LearningPage />}
-        {![
-          "overview",
-          "applicants",
-          "timeline",
-          "graph",
-          "patterns",
-          "confidence",
-          "governance",
-          "learning",
-        ].includes(active) && <PlaceholderScreen id={active} />}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={active}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.18, ease: [0.2, 0.8, 0.2, 1] }}
+            style={{ width: "100%" }}
+          >
+            {active === "overview" && <OverviewPage />}
+            {active === "applicants" && <ApplicantsPage />}
+            {active === "timeline" && <TimelinePage />}
+            {active === "graph" && <GraphPage />}
+            {active === "patterns" && <PatternsPage />}
+            {active === "confidence" && <ConfidencePage />}
+            {active === "governance" && <GovernancePage />}
+            {active === "learning" && <LearningPage />}
+            {![
+              "overview",
+              "applicants",
+              "timeline",
+              "graph",
+              "patterns",
+              "confidence",
+              "governance",
+              "learning",
+            ].includes(active) && <PlaceholderScreen id={active} />}
+          </motion.div>
+        </AnimatePresence>
       </main>
-    </div>
+      </div>
+    </>
   );
 }
 

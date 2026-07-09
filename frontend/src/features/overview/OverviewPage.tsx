@@ -1,147 +1,202 @@
-/**
- * Overview — the M0 landing screen. Confirms the backend is reachable and
- * renders the platform's capability map straight from the API's feature flags,
- * so the console always tells the truth about what is live.
- */
+import { motion } from "framer-motion";
+import { AlertCircle, ArrowRight, CheckCircle2, DollarSign, Activity, Users, ShieldAlert, FileText, ChevronRight } from "lucide-react";
+import { OverviewChart } from "./OverviewChart";
 
-import { StatusBadge, type Status } from "../../design-system/StatusBadge";
-import { NAV_ITEMS } from "../../app/navigation";
-import { useCapabilities, useHealth } from "../../lib/queries";
-
-const FLAG_LABELS: Record<string, string> = {
-  temporal_features: "Temporal Intelligence",
-  knowledge_graph: "Financial Knowledge Graph",
-  pattern_discovery: "Pattern Discovery",
-  confidence_intelligence: "Confidence Intelligence",
-  compliance_engine: "Compliance & Consent",
-  offer_orchestration: "Offer Orchestration",
-  continuous_learning: "Continuous Learning",
-};
-
-function milestoneForFlag(flag: string): string {
-  return NAV_ITEMS.find((n) => n.flag === flag)?.milestone ?? "—";
-}
+const pipelineData = [
+  { name: 'Mon', value: 8.2 },
+  { name: 'Tue', value: 9.1 },
+  { name: 'Wed', value: 11.4 },
+  { name: 'Thu', value: 10.8 },
+  { name: 'Fri', value: 13.5 },
+  { name: 'Sat', value: 14.0 },
+  { name: 'Sun', value: 14.2 },
+];
 
 export function OverviewPage() {
-  const health = useHealth();
-  const caps = useCapabilities();
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.05, delayChildren: 0.1 }
+    }
+  };
 
-  const apiStatus: Status = health.isError
-    ? "error"
-    : health.isSuccess
-      ? "ok"
-      : "pending";
-
-  const flags = caps.data?.flags ?? {};
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15, scale: 0.98 },
+    show: { opacity: 1, y: 0, scale: 1, transition: { type: "tween", duration: 0.25, ease: [0.2, 0.8, 0.2, 1] } }
+  };
 
   return (
-    <>
+    <motion.div 
+      variants={containerVariants}
+      initial="hidden" 
+      animate="show"
+    >
       <header className="workspace__header">
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div>
-            <h1 className="workspace__title">Platform Overview</h1>
-            <p className="workspace__subtitle">
-              Adaptive lending intelligence — status and enabled capabilities
-            </p>
-          </div>
-          <StatusBadge status={apiStatus} />
+        <div>
+          <h1 className="workspace__title">Pipeline Overview</h1>
+          <p className="workspace__subtitle">
+            Your lending portfolio at a glance.
+          </p>
         </div>
       </header>
 
-      <div className="grid grid--2" style={{ marginBottom: "var(--space-4)" }}>
-        <div className="card">
-          <div className="card__title">Service</div>
-          <div className="card__hint">Live backend connection</div>
-          {health.isError ? (
-            <p className="empty">
-              API unreachable. Start it with{" "}
-              <code>uv run uvicorn idbi.main:app --reload --app-dir src</code>.
-            </p>
-          ) : (
-            <>
-              <div className="kv">
-                <span className="kv__key">Service</span>
-                <span className="kv__val">{health.data?.service ?? "—"}</span>
-              </div>
-              <div className="kv">
-                <span className="kv__key">Version</span>
-                <span className="kv__val">{health.data?.version ?? "—"}</span>
-              </div>
-              <div className="kv">
-                <span className="kv__key">Environment</span>
-                <span className="kv__val">
-                  {health.data?.environment ?? "—"}
-                </span>
-              </div>
-            </>
-          )}
-        </div>
+      {/* Key Metrics Row */}
+      <section style={{ marginBottom: "var(--space-6)" }}>
+        <div className="grid grid--4">
+          <motion.div variants={itemVariants} className="card" style={{ padding: "var(--space-3)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-2)", color: "var(--color-text-secondary)" }}>
+              <DollarSign size={16} />
+              <span style={{ fontSize: "var(--text-xs)", fontWeight: "var(--font-weight-medium)" }}>Total Pipeline</span>
+            </div>
+            <div style={{ fontSize: "var(--text-xl)", fontWeight: "var(--font-weight-bold)", color: "var(--color-text)", fontFamily: "var(--font-mono)" }}>
+              $14.2M
+            </div>
+          </motion.div>
 
-        <div className="card">
-          <div className="card__title">Roadmap</div>
-          <div className="card__hint">Milestone progress</div>
-          <div className="kv">
-            <span className="kv__key">M0 · Skeleton</span>
-            <span className="kv__val" style={{ color: "var(--color-positive)" }}>
-              done
-            </span>
-          </div>
-          <div className="kv">
-            <span className="kv__key">M1–M5 · Data → Compliance</span>
-            <span className="kv__val" style={{ color: "var(--color-positive)" }}>
-              done
-            </span>
-          </div>
-          <div className="kv">
-            <span className="kv__key">M6 · Validation + Learning</span>
-            <span className="kv__val" style={{ color: "var(--color-positive)" }}>
-              done
-            </span>
-          </div>
-          <div className="kv">
-            <span className="kv__key">Platform</span>
-            <span className="kv__val" style={{ color: "var(--color-positive)" }}>
-              complete
-            </span>
-          </div>
-        </div>
-      </div>
+          <motion.div variants={itemVariants} className="card" style={{ padding: "var(--space-3)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-2)", color: "var(--color-text-secondary)" }}>
+              <Users size={16} />
+              <span style={{ fontSize: "var(--text-xs)", fontWeight: "var(--font-weight-medium)" }}>Active Applications</span>
+            </div>
+            <div style={{ fontSize: "var(--text-xl)", fontWeight: "var(--font-weight-bold)", color: "var(--color-text)", fontFamily: "var(--font-mono)" }}>
+              128
+            </div>
+          </motion.div>
 
-      <div className="card">
-        <div className="card__title">Capabilities</div>
-        <div className="card__hint">
-          Driven live by the backend feature flags — features reveal
-          progressively as milestones land.
+          <motion.div variants={itemVariants} className="card" style={{ padding: "var(--space-3)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-2)", color: "var(--color-text-secondary)" }}>
+              <CheckCircle2 size={16} />
+              <span style={{ fontSize: "var(--text-xs)", fontWeight: "var(--font-weight-medium)" }}>Auto-Approval Rate</span>
+            </div>
+            <div style={{ fontSize: "var(--text-xl)", fontWeight: "var(--font-weight-bold)", color: "var(--color-positive)", fontFamily: "var(--font-mono)" }}>
+              64%
+            </div>
+          </motion.div>
+
+          <motion.div variants={itemVariants} className="card" style={{ padding: "var(--space-3)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-2)", color: "var(--color-text-secondary)" }}>
+              <Activity size={16} />
+              <span style={{ fontSize: "var(--text-xs)", fontWeight: "var(--font-weight-medium)" }}>Avg. Risk Score</span>
+            </div>
+            <div style={{ fontSize: "var(--text-xl)", fontWeight: "var(--font-weight-bold)", color: "var(--color-text)", fontFamily: "var(--font-mono)" }}>
+              42 <span style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", fontWeight: "normal" }}>/100</span>
+            </div>
+          </motion.div>
         </div>
-        <div className="grid grid--3">
-          {Object.keys(FLAG_LABELS).map((flag) => {
-            const on = flags[flag] ?? false;
-            return (
-              <div className="capability" key={flag}>
-                <div className="capability__head">
-                  <span className="capability__name">{FLAG_LABELS[flag]}</span>
-                  <span className="capability__ms">
-                    {milestoneForFlag(flag)}
-                  </span>
+      </section>
+
+      {/* Pipeline Trend Chart */}
+      <motion.section variants={itemVariants} style={{ marginBottom: "var(--space-6)" }}>
+        <div className="card" style={{ padding: "var(--space-4)" }}>
+          <div style={{ marginBottom: "var(--space-4)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <h2 style={{ fontSize: "var(--text-lg)", fontWeight: "var(--font-weight-bold)", color: "var(--color-text)" }}>
+                Pipeline Growth
+              </h2>
+              <p style={{ fontSize: "var(--text-sm)", color: "var(--color-text-secondary)", marginTop: "4px" }}>
+                Total loan value under management (in millions)
+              </p>
+            </div>
+            <div style={{ fontSize: "var(--text-2xl)", fontWeight: "var(--font-weight-bold)", color: "var(--color-text)", fontFamily: "var(--font-mono)" }}>
+              +73.1% <span style={{ fontSize: "var(--text-sm)", color: "var(--color-positive)", fontWeight: "var(--font-weight-medium)", fontFamily: "var(--font-sans)" }}>This Week</span>
+            </div>
+          </div>
+          <div style={{ height: "240px", width: "100%" }}>
+            <OverviewChart data={pipelineData} />
+          </div>
+        </div>
+      </motion.section>
+
+      <div className="grid grid--split">
+        {/* Needs Attention Section */}
+        <motion.section variants={itemVariants}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "var(--space-3)" }}>
+            <h2 style={{ fontSize: "var(--text-lg)", fontWeight: "var(--font-weight-bold)", color: "var(--color-text)" }}>
+              Needs Attention
+            </h2>
+            <button style={{ background: "transparent", border: "none", color: "var(--color-accent)", fontSize: "var(--text-sm)", cursor: "pointer" }}>View All</button>
+          </div>
+          <div className="card" style={{ padding: "0" }}>
+            <div className="kv" style={{ padding: "var(--space-3)", cursor: "pointer", borderBottom: "1px solid var(--color-border)" }}>
+              <div style={{ display: "flex", gap: "var(--space-3)" }}>
+                <div style={{ color: "var(--color-negative)", marginTop: "2px" }}><AlertCircle size={18} /></div>
+                <div>
+                  <div style={{ color: "var(--color-text)", fontWeight: "var(--font-weight-semibold)", fontSize: "var(--text-sm)" }}>Verify Income Documents</div>
+                  <div style={{ color: "var(--color-text-secondary)", fontSize: "var(--text-xs)", marginTop: "4px" }}>Applicant #8492 · $250k Commercial Loan</div>
                 </div>
-                <span
-                  className={`capability__state capability__state--${
-                    on ? "on" : "off"
-                  }`}
-                >
-                  {on ? "● Enabled" : "○ Not yet enabled"}
-                </span>
               </div>
-            );
-          })}
-        </div>
+              <ChevronRight size={16} color="var(--color-text-muted)" />
+            </div>
+            <div className="kv" style={{ padding: "var(--space-3)", cursor: "pointer", borderBottom: "1px solid var(--color-border)" }}>
+              <div style={{ display: "flex", gap: "var(--space-3)" }}>
+                <div style={{ color: "var(--color-warning)", marginTop: "2px" }}><ShieldAlert size={18} /></div>
+                <div>
+                  <div style={{ color: "var(--color-text)", fontWeight: "var(--font-weight-semibold)", fontSize: "var(--text-sm)" }}>Compliance Review Required</div>
+                  <div style={{ color: "var(--color-text-secondary)", fontSize: "var(--text-xs)", marginTop: "4px" }}>Applicant #9104 · High-Risk Pattern Detected</div>
+                </div>
+              </div>
+              <ChevronRight size={16} color="var(--color-text-muted)" />
+            </div>
+            <div className="kv" style={{ padding: "var(--space-3)", cursor: "pointer", borderBottom: "none" }}>
+              <div style={{ display: "flex", gap: "var(--space-3)" }}>
+                <div style={{ color: "var(--color-info)", marginTop: "2px" }}><FileText size={18} /></div>
+                <div>
+                  <div style={{ color: "var(--color-text)", fontWeight: "var(--font-weight-semibold)", fontSize: "var(--text-sm)" }}>Missing Signatures</div>
+                  <div style={{ color: "var(--color-text-secondary)", fontSize: "var(--text-xs)", marginTop: "4px" }}>Applicant #7721 · Retail Mortgage</div>
+                </div>
+              </div>
+              <ChevronRight size={16} color="var(--color-text-muted)" />
+            </div>
+          </div>
+        </motion.section>
+
+        {/* Recent Activity Section */}
+        <motion.section variants={itemVariants}>
+          <h2 style={{ fontSize: "var(--text-lg)", fontWeight: "var(--font-weight-bold)", marginBottom: "var(--space-3)", color: "var(--color-text)" }}>
+            Recent Engine Activity
+          </h2>
+          <div className="card" style={{ padding: "var(--space-4)" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "var(--space-4)" }}>
+              
+              <div style={{ display: "flex", gap: "var(--space-3)" }}>
+                <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--color-positive)", marginTop: "6px" }} />
+                <div>
+                  <div style={{ fontSize: "var(--text-sm)", color: "var(--color-text)" }}>
+                    <span style={{ fontWeight: "var(--font-weight-semibold)" }}>Auto-Approved</span> Application #9928
+                  </div>
+                  <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", marginTop: "4px" }}>2 mins ago</div>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: "var(--space-3)" }}>
+                <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--color-warning)", marginTop: "6px" }} />
+                <div>
+                  <div style={{ fontSize: "var(--text-sm)", color: "var(--color-text)" }}>
+                    <span style={{ fontWeight: "var(--font-weight-semibold)" }}>Flagged</span> Application #9925 for Manual Review
+                  </div>
+                  <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", marginTop: "4px" }}>14 mins ago</div>
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: "var(--space-3)" }}>
+                <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "var(--color-negative)", marginTop: "6px" }} />
+                <div>
+                  <div style={{ fontSize: "var(--text-sm)", color: "var(--color-text)" }}>
+                    <span style={{ fontWeight: "var(--font-weight-semibold)" }}>Rejected</span> Application #9914 (Risk Score: 92)
+                  </div>
+                  <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", marginTop: "4px" }}>1 hour ago</div>
+                </div>
+              </div>
+
+            </div>
+            
+            <button style={{ marginTop: "var(--space-4)", display: "flex", alignItems: "center", gap: "var(--space-2)", color: "var(--color-accent)", fontSize: "var(--text-sm)", fontWeight: "var(--font-weight-medium)", background: "transparent", border: "none", cursor: "pointer" }}>
+              View Full Audit Log <ArrowRight size={16} />
+            </button>
+          </div>
+        </motion.section>
       </div>
-    </>
+    </motion.div>
   );
 }

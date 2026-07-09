@@ -1,64 +1,113 @@
-/**
- * Learning-history chart — ROC-AUC on the fixed held-out set across simulated
- * retrain rounds. Inline SVG; points appear as outcomes accumulate.
- */
-
+import { useEffect, useRef } from "react";
+import { createChart, ColorType, LineSeries } from "lightweight-charts";
+import type { IChartApi } from "lightweight-charts";
 import type { LearningStep } from "../../lib/api";
-import { num } from "../../design-system/format";
-
-const W = 560;
-const H = 220;
-const PAD = { top: 24, right: 20, bottom: 40, left: 48 };
 
 export function LearningChart({ history }: { history: LearningStep[] }) {
-  const plotW = W - PAD.left - PAD.right;
-  const plotH = H - PAD.top - PAD.bottom;
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const chartRef = useRef<IChartApi | null>(null);
 
-  // Fixed y-range around typical AUC so movement is legible.
-  const yMin = 0.6;
-  const yMax = 0.9;
-  const stepsTotal = 4;
+  useEffect(() => {
+    if (!chartContainerRef.current || !history.length) return;
 
-  const x = (step: number) =>
-    PAD.left + (stepsTotal <= 1 ? 0 : (step / (stepsTotal - 1)) * plotW);
-  const y = (v: number) =>
-    PAD.top + plotH * (1 - (v - yMin) / (yMax - yMin));
+    // Map the steps (0, 1, 2...) to fake sequential dates so lightweight-charts
+    // can plot them chronologically. We'll format the X-axis to show "R0", "R1".
+    const tvData = history.map((h, i) => {
+      // Base date: 2025-01-01
+      const date = new Date(2025, 0, 1 + i);
+      return {
+        time: date.toISOString().split("T")[0],
+        value: h.roc_auc,
+        step: h.step,
+        trainSize: h.train_size,
+      };
+    });
 
-  const path = history.map((h) => `${x(h.step)},${y(h.roc_auc)}`).join(" ");
-  const yTicks = [0.6, 0.7, 0.8, 0.9];
+    const chart = createChart(chartContainerRef.current, {
+      layout: {
+        background: { type: ColorType.Solid, color: "transparent" },
+        textColor: "rgba(255, 255, 255, 0.5)",
+        fontFamily: "var(--font-mono)",
+      },
+      grid: {
+        vertLines: { color: "rgba(255, 255, 255, 0.05)", style: 3 },
+        horzLines: { color: "rgba(255, 255, 255, 0.05)", style: 3 },
+      },
+      rightPriceScale: {
+        borderVisible: false,
+        autoScale: false,
+        // Lock the y-axis to a legible range for ROC-AUC
+        scaleMargins: { top: 0.1, bottom: 0.1 },
+        tickMarkFormatter: (price: number) => price.toFixed(3),
+      },
+      timeScale: {
+        borderVisible: false,
+        timeVisible: true,
+        tickMarkFormatter: (time: string) => {
+          const match = tvData.find(d => d.time === time);
+          return match ? `R${match.step}` : time;
+        }
+      },
+      crosshair: {
+        mode: 1, // Magnet
+        vertLine: {
+          color: "rgba(255, 255, 255, 0.2)",
+          width: 1,
+          style: 3,
+          labelBackgroundColor: "#2563eb",
+        },
+        horzLine: {
+          color: "rgba(255, 255, 255, 0.2)",
+          width: 1,
+          style: 3,
+          labelBackgroundColor: "#2563eb",
+        },
+      },
+      handleScroll: false,
+      handleScale: false,
+    });
+    
+    chartRef.current = chart;
+
+    // Apply strict min/max to visually stabilize the chart across retrains
+    chart.priceScale("right").applyOptions({
+      autoScale: false,
+      minValue: 0.55,
+      maxValue: 0.95,
+    });
+
+    const series = chart.addSeries(LineSeries, {
+      color: "#2563eb", // Primary blue
+      lineWidth: 2,
+      crosshairMarkerVisible: true,
+      crosshairMarkerRadius: 5,
+    });
+    
+    series.setData(tvData.map(d => ({ time: d.time, value: d.value })));
+    
+    // Fit the content so all points are visible
+    chart.timeScale().fitContent();
+
+    return () => {
+      chart.remove();
+    };
+  }, [history]);
 
   return (
-    <svg className="chart" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid meet" role="img">
-      {yTicks.map((v) => (
-        <g key={v}>
-          <line x1={PAD.left} x2={W - PAD.right} y1={y(v)} y2={y(v)}
-            stroke="rgba(255,255,255,0.07)" strokeDasharray="2 3" />
-          <text x={PAD.left - 8} y={y(v) + 3} className="chart__ytick" fill="#71717a">
-            {num(v, 2)}
-          </text>
-        </g>
-      ))}
-
-      {/* projected future points (faint) */}
-      {Array.from({ length: stepsTotal }, (_, s) => (
-        <circle key={`ghost-${s}`} cx={x(s)} cy={y(yMin)} r={0} />
-      ))}
-
-      <polyline points={path} fill="none" stroke="#2563eb" strokeWidth={2.5} />
-      {history.map((h) => (
-        <g key={h.step}>
-          <circle cx={x(h.step)} cy={y(h.roc_auc)} r={4} fill="#2563eb" />
-          <text x={x(h.step)} y={y(h.roc_auc) - 10} className="chart__point" fill="#ededed">
-            {num(h.roc_auc, 3)}
-          </text>
-          <text x={x(h.step)} y={H - 22} className="chart__xtick" fill="#71717a">
-            R{h.step}
-          </text>
-          <text x={x(h.step)} y={H - 8} className="chart__xsub" fill="#52525b">
-            {h.train_size}
-          </text>
-        </g>
-      ))}
-    </svg>
+    <div style={{ width: "100%", margin: "var(--space-2) 0" }}>
+      <div ref={chartContainerRef} style={{ width: "100%", height: "220px" }} />
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        padding: "0 var(--space-2)",
+        marginTop: "8px",
+        fontSize: "11px",
+        color: "var(--color-text-muted)",
+        fontFamily: "var(--font-mono)"
+      }}>
+        <span>ROC-AUC Metric</span>
+        <span>Training Pool Growth</span>
+      </div>
+    </div>
   );
 }

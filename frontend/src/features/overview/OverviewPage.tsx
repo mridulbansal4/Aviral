@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { AlertCircle, ArrowRight, CheckCircle2, DollarSign, Activity, Users, ShieldAlert, FileText, ChevronRight } from "lucide-react";
 import { OverviewChart } from "./OverviewChart";
 
@@ -13,7 +13,7 @@ const pipelineData = [
 ];
 
 export function OverviewPage() {
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -21,7 +21,7 @@ export function OverviewPage() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 15, scale: 0.98 },
     show: { opacity: 1, y: 0, scale: 1, transition: { type: "tween", duration: 0.25, ease: [0.2, 0.8, 0.2, 1] } }
   };

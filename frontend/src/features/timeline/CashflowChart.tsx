@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { createChart, ColorType, HistogramSeries, LineSeries } from "lightweight-charts";
-import type { IChartApi, ISeriesApi } from "lightweight-charts";
+import type { IChartApi } from "lightweight-charts";
 import type { TimelinePoint } from "../../lib/api";
 
 export function CashflowChart({ points }: { points: TimelinePoint[] }) {

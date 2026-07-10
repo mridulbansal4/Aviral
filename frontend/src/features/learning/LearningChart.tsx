@@ -24,6 +24,9 @@ export function LearningChart({ history }: { history: LearningStep[] }) {
     });
 
     const chart = createChart(chartContainerRef.current, {
+      localization: {
+        priceFormatter: (price: number) => price.toFixed(3),
+      },
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
         textColor: "rgba(255, 255, 255, 0.5)",
@@ -38,7 +41,6 @@ export function LearningChart({ history }: { history: LearningStep[] }) {
         autoScale: false,
         // Lock the y-axis to a legible range for ROC-AUC
         scaleMargins: { top: 0.1, bottom: 0.1 },
-        tickMarkFormatter: (price: number) => price.toFixed(3),
       },
       timeScale: {
         borderVisible: false,
@@ -72,8 +74,6 @@ export function LearningChart({ history }: { history: LearningStep[] }) {
     // Apply strict min/max to visually stabilize the chart across retrains
     chart.priceScale("right").applyOptions({
       autoScale: false,
-      minValue: 0.55,
-      maxValue: 0.95,
     });
 
     const series = chart.addSeries(LineSeries, {

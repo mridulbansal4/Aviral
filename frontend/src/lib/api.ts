@@ -143,6 +143,7 @@ export interface GraphNode {
   kind: string;
   subtype: string;
   is_focus: boolean;
+  [key: string]: unknown;
 }
 
 export interface GraphEdge {

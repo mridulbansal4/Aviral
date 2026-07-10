@@ -142,8 +142,8 @@ export function GraphCanvas({
     return { rfNodes: mappedNodes, rfEdges: mappedEdges };
   }, [initialNodes, initialEdges]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(rfNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(rfEdges);
+  const [nodes, , onNodesChange] = useNodesState(rfNodes);
+  const [edges, , onEdgesChange] = useEdgesState(rfEdges);
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     if (node.data.kind === "customer" && !node.data.is_focus) {

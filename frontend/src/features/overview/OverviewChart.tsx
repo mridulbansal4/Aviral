@@ -23,6 +23,9 @@ export function OverviewChart({ data }: { data: { name: string; value: number }[
     });
 
     const chart = createChart(chartContainerRef.current, {
+      localization: {
+        priceFormatter: (price: number) => `$${price.toFixed(1)}M`,
+      },
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
         textColor: "rgba(255, 255, 255, 0.5)",
@@ -34,7 +37,6 @@ export function OverviewChart({ data }: { data: { name: string; value: number }[
       },
       rightPriceScale: {
         borderVisible: false,
-        tickMarkFormatter: (price: number) => `$${price.toFixed(1)}M`,
       },
       timeScale: {
         borderVisible: false,

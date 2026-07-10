@@ -7,10 +7,9 @@ import { X, AlertCircle } from "lucide-react";
 // Strict Zod schema for enterprise compliance
 const declineSchema = z.object({
   reasonCode: z.enum(["DTI_HIGH", "SCORE_LOW", "INCOME_UNVERIFIED", "FRAUD_RISK", "POLICY_VIOLATION"], {
-    errorMap: () => ({ message: "A valid decline reason code is required for compliance." })
+    error: "A valid decline reason code is required for compliance.",
   }),
   internalNotes: z.string().min(10, "Internal notes must be at least 10 characters detailing the adverse action."),
-  complianceOverride: z.boolean().default(false),
 });
 
 type DeclineFormValues = z.infer<typeof declineSchema>;

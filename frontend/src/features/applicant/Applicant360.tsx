@@ -1,10 +1,8 @@
 import { motion } from "framer-motion";
-import { ArrowLeft, Check, X, Flag, ChevronRight } from "lucide-react";
+import { ArrowLeft, Check, X, Flag } from "lucide-react";
 import { toast } from "sonner";
 
 import "../offer/offer.css";
-import { Gauge } from "../../design-system/Gauge";
-import { StatusBadge } from "../../design-system/StatusBadge";
 import { inr, pct, titleCase } from "../../design-system/format";
 import { useConsent, useDecision } from "../../lib/queries";
 import { OfferPanel } from "../offer/OfferPanel";
@@ -39,7 +37,6 @@ export function Applicant360({
     return <div className="empty">Could not load this applicant.</div>;
 
   const predictedConvert = d.propensity >= 0.5;
-  const agrees = predictedConvert === d.ground_truth.converted;
 
   const handleAction = (action: string) => {
     toast.success(`Applicant ${action}`, {

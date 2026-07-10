@@ -4,21 +4,23 @@
  */
 
 /**
- * Where the API lives.
+ * Where the API lives. The path is always `/api/v1`; only the origin varies.
  * 1. `VITE_API_BASE_URL` always wins if set (e.g. a custom domain).
- * 2. On localhost we use a relative path so Vite's dev-proxy forwards `/api`
- *    to the backend (no CORS needed for local development).
- * 3. When served from any other host (a deployed VM/IP), we talk to the backend
- *    on the *same host* at port 8000 — e.g. frontend on http://<ip>:3000 calls
- *    http://<ip>:8000/api/v1. The backend must allow that origin (see CORS).
+ * 2. Over HTTPS (e.g. Vercel) we use a same-origin relative path so a
+ *    proxy/rewrite forwards `/api/*` to the backend — this avoids mixed-content
+ *    (the backend is plain HTTP) and CORS. See `vercel.json`.
+ * 3. On localhost the relative path is served by Vite's dev-proxy.
+ * 4. Plain-HTTP direct-IP serving with no proxy: call the backend on :8000 of
+ *    the same host (backend CORS must allow that origin).
  */
 function resolveApiBase(): string {
   const fromEnv = import.meta.env.VITE_API_BASE_URL;
   if (fromEnv) return fromEnv;
   if (typeof window === "undefined") return "/api/v1";
   const { protocol, hostname } = window.location;
+  if (protocol === "https:") return "/api/v1";
   if (hostname === "localhost" || hostname === "127.0.0.1") return "/api/v1";
-  return `${protocol}//${hostname}:8000/api/v1`;
+  return `http://${hostname}:8000/api/v1`;
 }
 
 const API_BASE_URL = resolveApiBase();

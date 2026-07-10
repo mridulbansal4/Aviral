@@ -1,5 +1,5 @@
 /**
- * Typed API client. A single, thin fetch wrapper — no data-fetching logic
+ * Typed API client. A single, thin fetch wrapper - no data-fetching logic
  * lives in components. Base URL is configurable via `VITE_API_BASE_URL`.
  */
 

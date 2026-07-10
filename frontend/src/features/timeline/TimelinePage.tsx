@@ -125,7 +125,7 @@ export function TimelinePage() {
             {/* TradingView Cashflow Chart */}
             <div className="card">
               <div className="card__title">Cashflow Chart</div>
-              <div className="card__hint">Income vs. Spend vs. Net Savings — canvas-rendered</div>
+              <div className="card__hint">Income vs. Spend vs. Net Savings - canvas-rendered</div>
               <CashflowChart points={data.points} />
             </div>
           </div>

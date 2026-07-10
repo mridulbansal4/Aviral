@@ -1,5 +1,5 @@
 /**
- * Relationship Graph — the applicant's financial neighbourhood: employers,
+ * Relationship Graph - the applicant's financial neighbourhood: employers,
  * builders, lenders and merchants, plus peers who share the same employer or
  * builder. Clicking a peer re-centres the investigation on them.
  */
@@ -30,7 +30,7 @@ export function GraphPage() {
         <div>
           <h1 className="workspace__title">Relationship Graph</h1>
           <p className="workspace__subtitle">
-            Financial knowledge graph — entities, flows and shared hubs
+            Financial knowledge graph - entities, flows and shared hubs
           </p>
         </div>
         <ApplicantPicker value={id} onChange={setId} />

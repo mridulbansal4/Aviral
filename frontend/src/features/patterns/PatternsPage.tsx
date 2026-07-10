@@ -1,5 +1,5 @@
 /**
- * Pattern Explorer — the behavioural clusters discovered in the population,
+ * Pattern Explorer - the behavioural clusters discovered in the population,
  * ranked by conversion rate. Each card shows how far the pattern departs from
  * the base rate (the discovery signal), what defines it, and example members.
  */
@@ -94,7 +94,7 @@ export function PatternsPage() {
         <h1 className="workspace__title">Pattern Explorer</h1>
         <p className="workspace__subtitle">
           Behavioural clusters discovered unsupervised, then characterized by
-          outcome — base rate {pct(baseRate)}
+          outcome - base rate {pct(baseRate)}
         </p>
       </header>
 

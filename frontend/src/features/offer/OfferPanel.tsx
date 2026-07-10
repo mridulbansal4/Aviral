@@ -1,5 +1,5 @@
 /**
- * Offer panel — the orchestrated, compliant loan offer for one applicant.
+ * Offer panel - the orchestrated, compliant loan offer for one applicant.
  * Shows the headline terms, how the principal was bounded (income vs FOIR cap),
  * the risk-based pricing breakdown, the FOIR impact, and every eligibility
  * check. A declined consent shows here as a hard stop.

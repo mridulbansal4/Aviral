@@ -1,4 +1,4 @@
-/** TanStack Query hooks — the only place components touch the API. */
+/** TanStack Query hooks - the only place components touch the API. */
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 

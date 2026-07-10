@@ -42,10 +42,16 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    # CORS. A wildcard "*" in the config allows any origin (handy for a deployed
+    # demo served on port 80/3000/etc.); the CORS spec forbids credentials with
+    # a wildcard, so we disable them in that case. The app sends no cookies, so
+    # this is safe. Otherwise the explicit origin list is used with credentials.
+    origins = settings.cors.allow_origins
+    allow_all = "*" in origins
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors.allow_origins,
-        allow_credentials=True,
+        allow_origins=origins,
+        allow_credentials=not allow_all,
         allow_methods=["*"],
         allow_headers=["*"],
     )

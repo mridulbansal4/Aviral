@@ -9,16 +9,12 @@ app:
   api_prefix: "/api/v1"
 
 cors:
-  # Browser origins allowed to call the API. Local dev uses the Vite proxy
-  # (same-origin, no CORS needed); deployed frontends call cross-origin, so
-  # their exact origin must be listed here. Update the IP if the VM's changes.
+  # Browser origins allowed to call the API. "*" allows any origin — appropriate
+  # for this synthetic-data demo, and it survives being served on any port
+  # (80, 3000, 5173…) or a changed VM IP without further edits. To lock this
+  # down later, replace "*" with an explicit list of origins.
   allow_origins:
-    - "http://localhost:5173"
-    - "http://127.0.0.1:5173"
-    - "http://localhost:3000"
-    - "http://127.0.0.1:3000"
-    - "http://34.100.235.201:3000"
-    - "http://34.100.235.201:5173"
+    - "*"
 
 logging:
   level: "INFO"

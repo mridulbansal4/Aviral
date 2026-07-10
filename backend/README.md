@@ -8,7 +8,7 @@ One-time setup:
 
 ```bash
 uv venv --python 3.12
-uv pip install -e ".[dev,ml]"
+uv pip install -e ".[dev]"
 ```
 
 Then run the API (either form works):

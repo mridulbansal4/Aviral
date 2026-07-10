@@ -24,7 +24,7 @@ docs/        ADRs (architecture decision records)
 ```bash
 cd backend
 uv venv --python 3.12
-uv pip install -e ".[dev,ml]"
+uv pip install -e ".[dev]"
 uv run uvicorn main:app --reload        # → http://127.0.0.1:8000/docs
 ```
 

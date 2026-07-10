@@ -1,7 +1,7 @@
 /**
- * Learning Dashboard — closes the loop. Left: the SIMULATED continuous-learning
+ * Learning Dashboard - closes the loop. Left: the SIMULATED continuous-learning
  * cycle (retrain on accumulating outcomes, real before/after deltas on a fixed
- * held-out set). Right: validation — feature-family contribution, rule
+ * held-out set). Right: validation - feature-family contribution, rule
  * precision, and PSI drift. The "Simulated" framing is explicit throughout.
  */
 
@@ -149,7 +149,7 @@ function ValidationPanel() {
       <div className="card">
         <div className="card__title">Drift monitoring</div>
         <div className="card__hint">
-          PSI, reference vs recent cohort —{" "}
+          PSI, reference vs recent cohort -{" "}
           <span className={`drift-status drift-status--${DRIFT_TONE[data.drift.status]}`}>
             {titleCase(data.drift.status)}
           </span>

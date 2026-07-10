@@ -27,7 +27,7 @@ const SUBTYPE_COLOR: Record<string, string> = {
   self_employed: "#e4e4e7",
 };
 
-// Sharp Enterprise Node — radial layout, Palantir Foundry style
+// Sharp Enterprise Node - radial layout, Palantir Foundry style
 function EnterpriseNode({ data }: { data: any }) {
   const color = SUBTYPE_COLOR[data.subtype] ?? "#52525b";
   const isFocus = data.is_focus;

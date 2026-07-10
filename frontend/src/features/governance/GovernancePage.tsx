@@ -1,5 +1,5 @@
 /**
- * Governance — portfolio-level model card and compliance posture. Surfaces the
+ * Governance - portfolio-level model card and compliance posture. Surfaces the
  * fair-lending guardrails (prohibited features refused in code), the honest
  * model metrics, consent coverage, and the model's stated limitations. This is
  * the screen a bank's risk/compliance reviewer opens first.

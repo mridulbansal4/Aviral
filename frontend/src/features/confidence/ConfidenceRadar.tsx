@@ -1,5 +1,5 @@
 /**
- * Confidence radar — a pentagon plotting the five sub-confidences. Inline SVG,
+ * Confidence radar - a pentagon plotting the five sub-confidences. Inline SVG,
  * no chart library. Communicates the *shape* of confidence at a glance: a
  * balanced pentagon reads very differently from a spiky one.
  */

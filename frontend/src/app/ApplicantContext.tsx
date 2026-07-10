@@ -1,6 +1,6 @@
 /**
  * Active-applicant context. Selecting an applicant anywhere (the list, a graph
- * peer) makes every applicant-scoped screen — 360, Timeline, Graph — follow the
+ * peer) makes every applicant-scoped screen - 360, Timeline, Graph - follow the
  * same subject, so the console feels like one coherent investigation.
  */
 

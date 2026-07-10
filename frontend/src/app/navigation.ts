@@ -1,6 +1,6 @@
 /**
  * Navigation model. Each screen from the roadmap maps to the feature flag that
- * unlocks it, so the UI progressively reveals complexity as milestones land —
+ * unlocks it, so the UI progressively reveals complexity as milestones land -
  * locked screens are shown but disabled, communicating the platform's shape
  * without pretending unfinished features work.
  */
@@ -27,7 +27,7 @@ export const NAV_ITEMS: NavItem[] = [
     label: "Applicants",
     flag: null,
     milestone: "M2",
-    description: "Book of business, scored — drill into Applicant 360 with SHAP evidence",
+    description: "Book of business, scored - drill into Applicant 360 with SHAP evidence",
   },
   {
     id: "timeline",

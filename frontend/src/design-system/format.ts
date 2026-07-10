@@ -1,4 +1,4 @@
-/** Shared formatters — Indian locale conventions for a banking product. */
+/** Shared formatters - Indian locale conventions for a banking product. */
 
 export function inr(value: number, compact = false): string {
   return new Intl.NumberFormat("en-IN", {

@@ -1,5 +1,5 @@
 /**
- * Confidence Inspector — decomposes Decision Confidence into its five defined
+ * Confidence Inspector - decomposes Decision Confidence into its five defined
  * dimensions. The radar shows the shape; the dimension cards show the exact
  * value, weight, rationale and the raw inputs behind each score. No black-box
  * "High/Medium/Low".

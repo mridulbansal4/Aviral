@@ -18,7 +18,7 @@ import {
   BrainCircuit,
 } from "lucide-react";
 
-/** Line icons per screen — keeps the sidebar reading as a real console. */
+/** Line icons per screen - keeps the sidebar reading as a real console. */
 function NavIcon({ id }: { id: string }) {
   const icons: Record<string, React.ReactNode> = {
     overview: <LayoutDashboard size={16} />,
@@ -156,7 +156,7 @@ function SidebarFooter() {
             {ok ? "All systems operational" : "Connecting…"}
           </span>
           <span className="sysstatus__meta">
-            Engine {version ? `v${version}` : "—"}
+            Engine {version ? `v${version}` : "-"}
           </span>
         </div>
       </div>
